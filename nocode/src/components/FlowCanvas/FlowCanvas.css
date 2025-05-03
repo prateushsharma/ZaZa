@@ -1,0 +1,14 @@
+.flow-container {
+    width: 100vw;
+    height: 100vh;
+    background: #f0f2f5;
+  }
+  
+  .react-flow__node {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s;
+  }
+  
+  .react-flow__node:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }

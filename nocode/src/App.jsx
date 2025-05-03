@@ -1,25 +1,12 @@
-import { useState } from 'react'
-import FlowCanvas from './components/FlowCanvas/FlowCanvas'
-import NodePanel from './components/NodePanel/NodePanel'
-import './App.css'
+import NodePanel from './components/NodePanel/NodePanel';
+import FlowCanvas from './components/FlowCanvas/FlowCanvas';
+import './App.css';
 
-function App() {
-  const [selectedNode, setSelectedNode] = useState(null)
-
+export default function App() {
   return (
     <div className="app-container">
       <NodePanel />
-      <FlowCanvas 
-        selectedNode={selectedNode}
-        setSelectedNode={setSelectedNode}
-      />
-      {selectedNode && (
-        <div className="settings-panel">
-          {/* Node-specific settings will go here */}
-        </div>
-      )}
+      <FlowCanvas />
     </div>
-  )
+  );
 }
-
-export default App

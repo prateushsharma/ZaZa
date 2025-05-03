@@ -1,15 +1,14 @@
 import { Handle, Position } from 'reactflow';
-import { startNodeConfig } from './StartNodeConfig';
+import './StartNode.css';
 
-export const StartNode = ({ data }) => (
-  <div className="start-node">
-    <Handle type="source" position={Position.Bottom} />
-    <div className="node-header">
-      <startNodeConfig.Icon />
-      <h4>{startNodeConfig.label}</h4>
+export default function StartNode() {
+  return (
+    <div className="start-node">
+      <Handle type="source" position={Position.Bottom} />
+      <div className="node-content">
+        <div className="node-icon">▶</div>
+        <h4>Start Workflow</h4>
+      </div>
     </div>
-    <div className="node-content">
-      <p>Begin workflow from this node</p>
-    </div>
-  </div>
-);
+  );
+}
