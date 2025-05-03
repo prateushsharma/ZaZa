@@ -1,11 +1,19 @@
 // src/main.jsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import App from './App';
+import { SuiClientProvider, WalletProvider } from '@mysten/dapp-kit';
+
+// Global styles (if using)
 import './index.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
+// Create root instance
+const root = createRoot(document.getElementById('root'));
+
+// Render application
+root.render(
+  <SuiClientProvider>
+  <WalletProvider>
     <App />
-  </React.StrictMode>
+  </WalletProvider>
+</SuiClientProvider>
 );
