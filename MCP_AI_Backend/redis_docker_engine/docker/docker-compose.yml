@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  redis-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: redis-server
+    ports:
+      - "6379:6379"
