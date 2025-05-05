@@ -1,84 +1,66 @@
-
-/* src/styles/sidebar.css */
+/* src/styles/Sidebar.css */
 .sidebar {
-    width: 250px;
-    background-color: white;
-    border-right: 1px solid #e5e7eb;
-    padding: 15px;
+    width: 240px;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
     overflow-y: auto;
   }
   
-  .sidebar-title {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: #111827;
+  .sidebar-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--bg-tertiary);
   }
   
-  .node-button {
-    width: 100%;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    background-color: white;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 14px;
-  }
-  
-  .node-button:hover {
-    background-color: #f9fafb;
-  }
-  
-  .node-button svg {
-    margin-right: 8px;
-    width: 16px;
-    height: 16px;
-  }
-  
-  .config-panel {
-    margin-top: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    overflow: hidden;
-  }
-  
-  .config-header {
-    padding: 12px 16px;
-    background-color: #f9fafb;
-    border-bottom: 1px solid #e5e7eb;
+  .sidebar-header h3 {
     font-size: 16px;
     font-weight: 600;
+    color: var(--text-primary);
   }
   
-  .config-content {
+  .sidebar-nodes {
     padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
   
-  .config-input {
-    margin-bottom: 15px;
-  }
-  
-  .config-input label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 14px;
-    color: #4b5563;
-  }
-  
-  .config-input input {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #d1d5db;
+  .node {
+    border: 1px solid var(--border-color);
     border-radius: 4px;
-    font-size: 14px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    cursor: grab;
+    background-color: var(--bg-tertiary);
+    transition: all 0.2s ease;
   }
   
-  .config-input input:focus {
-    outline: none;
-    border-color: #4f46e5;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  .node:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .node-icon {
+    font-size: 18px;
+    margin-right: 12px;
+  }
+  
+  .node-label {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .node-start .node-icon {
+    color: var(--accent-primary);
+  }
+  
+  .node-payment .node-icon {
+    color: var(--success-color);
+  }
+  
+  .node-notification .node-icon {
+    color: var(--warning-color);
   }

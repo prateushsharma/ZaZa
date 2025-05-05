@@ -1,91 +1,91 @@
 // src/components/FlowCanvas.jsx
-import { useState, useRef } from 'react';
-import StartNode from './nodes/StartNode';
-import PaymentNode from './nodes/PaymentNode';
-import NotificationNode from './nodes/NotificationNode';
-import ConnectionLine from './ConnectionLine';
-import '../App.css';
+import React, { useState, useCallback } from 'react';
+import ReactFlow, { 
+  Background, 
+  Controls,
+  MiniMap,
+  addEdge,
+  applyEdgeChanges,
+  applyNodeChanges
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import { nodeTypes } from './nodes/NodeTypes';
+import '../styles/FlowCanvas.css';
 
-export default function FlowCanvas({
-  nodes,
-  connections,
-  selectedNode,
-  onNodeClick,
-  onNodeMouseDown,
-  onMouseUp,
-  onConnectNodes,
-  onDeleteConnection,
-  onRunFlow,
-  isRunning
-}) {
-  const canvasRef = useRef(null);
+const FlowCanvas = () => {
+  // Initial flow state
+  const [nodes, setNodes] = useState([]);
+  const [edges, setEdges] = useState([]);
+  
+  // Handle nodes changes (add, remove, position)
+  const onNodesChange = useCallback((changes) => {
+    setNodes((nds) => applyNodeChanges(changes, nds));
+  }, []);
 
-  const handleCanvasClick = (e) => {
-    if (e.target === canvasRef.current) {
-      onNodeClick(null);
-    }
-  };
+  // Handle edges changes (add, remove)
+  const onEdgesChange = useCallback((changes) => {
+    setEdges((eds) => applyEdgeChanges(changes, eds));
+  }, []);
 
-  const renderNode = (node) => {
-    const commonProps = {
-      node,
-      onClick: () => onNodeClick(node),
-      onMouseDown: (e) => onNodeMouseDown(node, e),
-      selected: selectedNode?.id === node.id
+  // Handle new connections between nodes
+  const onConnect = useCallback((params) => {
+    setEdges((eds) => addEdge(params, eds));
+  }, []);
+
+  // Handle dropping new nodes onto the canvas
+  const onDrop = useCallback((event) => {
+    event.preventDefault();
+    
+    const nodeType = event.dataTransfer.getData('application/reactflow');
+    
+    if (!nodeType) return;
+
+    const position = {
+      x: event.clientX - event.target.getBoundingClientRect().left,
+      y: event.clientY - event.target.getBoundingClientRect().top,
     };
 
-    switch (node.type) {
-      case 'start':
-        return <StartNode key={node.id} {...commonProps} />;
-      case 'payment':
-        return <PaymentNode key={node.id} {...commonProps} />;
-      case 'notification':
-        return <NotificationNode key={node.id} {...commonProps} />;
-      default:
-        return null;
-    }
-  };
+    // Create a new node based on the dropped type
+    const newNode = {
+      id: `${nodeType}-${Date.now()}`,
+      type: nodeType,
+      position,
+      data: { label: nodeType.replace('Node', '') },
+    };
+
+    setNodes((nds) => nds.concat(newNode));
+  }, []);
+
+  const onDragOver = useCallback((event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
 
   return (
-    <div className="canvas-container" ref={canvasRef} onClick={handleCanvasClick}>
-      <svg className="connection-layer">
-        <defs>
-          <marker
-            id="arrowhead"
-            markerWidth="10"
-            markerHeight="7"
-            refX="9"
-            refY="3.5"
-            orient="auto"
-          >
-            <polygon points="0 0, 10 3.5, 0 7" fill="#888" />
-          </marker>
-        </defs>
-        {connections.map(conn => (
-          <ConnectionLine 
-            key={`${conn.from}-${conn.to}`}
-            connection={conn}
-            nodes={nodes}
-            onDelete={onDeleteConnection}
-          />
-        ))}
-      </svg>
-
-      {nodes.map(renderNode)}
-
-      {selectedNode && (
-        <div className="connection-indicator">
-          Click another node to connect from: {selectedNode.type}
-        </div>
-      )}
-
-      <button 
-        className="run-button"
-        onClick={onRunFlow}
-        disabled={isRunning || nodes.length === 0}
+    <div className="flow-canvas">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        deleteKeyCode="Delete"
+        snapToGrid={true}
+        snapGrid={[15, 15]}
       >
-        {isRunning ? 'Running...' : 'Run Flow'}
-      </button>
+        <Background color="#444" gap={16} />
+        <Controls />
+        <MiniMap
+          nodeStrokeColor="#555"
+          nodeColor="#333"
+          nodeBorderRadius={2}
+        />
+      </ReactFlow>
     </div>
   );
-}
+};
+
+export default FlowCanvas;

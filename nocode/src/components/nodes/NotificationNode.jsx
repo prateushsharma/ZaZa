@@ -1,40 +1,37 @@
 // src/components/nodes/NotificationNode.jsx
-import { ArrowRight } from 'lucide-react';
-import "@/styles/nodes.css";
+import React, { useState } from 'react';
+import { Handle } from 'reactflow'; // Updated import
+import { BsBell } from 'react-icons/bs';
+import '../../styles/Nodes.css';
 
+const NotificationNode = ({ data }) => {
+  const [message, setMessage] = useState('');
 
-export function NotificationConfig({ config, onChange }) {
   return (
-    <div className="config-input">
-      <label>Message</label>
-      <input
-        type="text"
-        value={config?.message || ''}
-        onChange={(e) => onChange('message', e.target.value)}
+    <div className="custom-node notification-node">
+      <Handle
+        type="target"
+        position="left"
+        id="notification-in"
+        style={{ background: 'var(--accent-primary)' }}
       />
-    </div>
-  );
-}
-
-export default function NotificationNode({ node, onClick, onMouseDown, selected }) {
-  return (
-    <div
-      className={`node notification-node ${selected ? 'selected' : ''}`}
-      style={{ left: `${node.x}px`, top: `${node.y}px` }}
-      onClick={onClick}
-      onMouseDown={onMouseDown}
-    >
       <div className="node-header">
+        <BsBell className="node-icon" />
         <div className="node-title">Notification</div>
-        <div className="node-connector">
-          <ArrowRight color="#8b5cf6" size={14} />
+      </div>
+      <div className="node-content">
+        <div className="input-group">
+          <label>Message</label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Enter notification message"
+            rows={3}
+          />
         </div>
       </div>
-      {node.config && (
-        <div className="node-content">
-          <p>{node.config.message || 'No message'}</p>
-        </div>
-      )}
     </div>
   );
-}
+};
+
+export default NotificationNode;

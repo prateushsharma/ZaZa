@@ -1,29 +1,8 @@
-// src/index.css
+/* src/index.css */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5;
+  padding: 0;
 }
 
-h1 {
-  margin-top: 20px;
-  color: #333;
-}
-
-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #45a049;
-}
-
-input {
-  font-size: 16px;
-}
+/* Import the App.css for global variables */
+@import './styles/App.css';

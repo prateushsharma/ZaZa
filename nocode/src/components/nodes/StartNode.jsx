@@ -1,22 +1,27 @@
 // src/components/nodes/StartNode.jsx
-import { Play } from 'lucide-react';
-import "@/styles/nodes.css";
+import React from 'react';
+import { Handle } from 'reactflow'; // Updated import
+import { BsLightningCharge } from 'react-icons/bs';
+import '../../styles/Nodes.css';
 
-
-export default function StartNode({ node, onClick, onMouseDown, selected }) {
+const StartNode = ({ data }) => {
   return (
-    <div
-      className={`node start-node ${selected ? 'selected' : ''}`}
-      style={{ left: `${node.x}px`, top: `${node.y}px` }}
-      onClick={onClick}
-      onMouseDown={onMouseDown}
-    >
+    <div className="custom-node start-node">
       <div className="node-header">
+        <BsLightningCharge className="node-icon" />
         <div className="node-title">Start</div>
-        <div className="node-connector">
-          <Play color="#10b981" size={14} />
-        </div>
       </div>
+      <div className="node-content">
+        <p>Workflow Entry Point</p>
+      </div>
+      <Handle
+        type="source"
+        position="right"
+        id="start-out"
+        style={{ background: 'var(--accent-primary)' }}
+      />
     </div>
   );
-}
+};
+
+export default StartNode;
