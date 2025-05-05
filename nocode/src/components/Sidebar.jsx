@@ -1,7 +1,16 @@
 // src/components/Sidebar.jsx
 import React from 'react';
 import '../styles/Sidebar.css';
-import { BsLightningCharge, BsCreditCard2Front, BsBell } from 'react-icons/bs';
+import { 
+  BsLightningCharge, 
+  BsCreditCard2Front, 
+  BsBell, 
+  BsRobot,
+  BsCpu,
+  BsDatabase,
+  BsTools,
+  BsLightbulb
+} from 'react-icons/bs';
 
 const Sidebar = () => {
   const onDragStart = (event, nodeType) => {
@@ -24,6 +33,38 @@ const Sidebar = () => {
           <div className="node-label">Start</div>
         </div>
         <div 
+          className="node node-agent" 
+          onDragStart={(event) => onDragStart(event, 'agentNode')}
+          draggable
+        >
+          <BsRobot className="node-icon" />
+          <div className="node-label">Agent</div>
+        </div>
+        <div 
+          className="node node-model" 
+          onDragStart={(event) => onDragStart(event, 'modelNode')}
+          draggable
+        >
+          <BsCpu className="node-icon" />
+          <div className="node-label">Chat Model</div>
+        </div>
+        <div 
+          className="node node-memory" 
+          onDragStart={(event) => onDragStart(event, 'memoryNode')}
+          draggable
+        >
+          <BsDatabase className="node-icon" />
+          <div className="node-label">Memory</div>
+        </div>
+        <div 
+          className="node node-tool" 
+          onDragStart={(event) => onDragStart(event, 'toolNode')}
+          draggable
+        >
+          <BsTools className="node-icon" />
+          <div className="node-label">Tool</div>
+        </div>
+        <div 
           className="node node-payment" 
           onDragStart={(event) => onDragStart(event, 'paymentNode')}
           draggable
@@ -38,6 +79,15 @@ const Sidebar = () => {
         >
           <BsBell className="node-icon" />
           <div className="node-label">Notification</div>
+        </div>
+       
+        <div 
+          className="node node-strategy" 
+          onDragStart={(event) => onDragStart(event, 'strategyNode')}
+          draggable
+        >
+          <BsLightbulb className="node-icon" />
+          <div className="node-label">Strategy</div>
         </div>
       </div>
     </div>
