@@ -1,6 +1,10 @@
 import sqlite3
 import os
 import json
+import sys
+
+sys.path.append('..')
+from utils.graph_preprocess import filter_workflow_json
 
 async def check_and_sync_code(uid: str, code) -> bool:
     try:
@@ -12,7 +16,7 @@ async def check_and_sync_code(uid: str, code) -> bool:
         with open(data_config_path, 'r') as f:
             current_code = json.load(f)
 
-        if current_code == code:
+        if filter_workflow_json(current_code) == filter_workflow_json(code) or current_code == code:
             return False, 200
 
         # Set "code_updated" to False in code_sync.json
@@ -33,7 +37,6 @@ async def check_and_sync_code(uid: str, code) -> bool:
     except (FileNotFoundError, json.JSONDecodeError, KeyError, TypeError) as e:
         print(f"Error: {e}")
         return False, 500
-
 
 async def update_user(uid: str, password: str, code):
     try:

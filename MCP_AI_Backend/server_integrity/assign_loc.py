@@ -75,7 +75,8 @@ async def create_user(config_json: str, password: str):
     user_folder.mkdir(parents=True, exist_ok=True)
 
     code_sync = {
-        "code_updated": False
+        "code_updated": False,
+        "code_deployed": False
     }
 
     # Create the necessary files (without writing any content except init_config.json)

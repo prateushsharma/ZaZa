@@ -1,7 +1,11 @@
 import os
 import json
+import sys
 
-async def deploy_user(uid, password):
+sys.path.append('..')
+from codegen_engine.graph_codegen import gen_code
+
+async def graph_to_code(uid, password=None):
     user_folder = f"./user_assets/{uid}"
     code_sync_path = os.path.join(user_folder, "code_sync.json")
 
@@ -20,11 +24,29 @@ async def deploy_user(uid, password):
     # Check if the "code_updated" field exists in the json and its value
     if code_sync_data.get("code_updated", False):
         return {"status": "error", "message": "The no code graph is already deployed and no changes are noticed", "code": 400}
-    
-    # Set "code_updated" to True and save the updated json back
-    code_sync_data["code_updated"] = True
 
-    with open(code_sync_path, 'w') as file:
-        json.dump(code_sync_data, file, indent=4)
+    # Copy the content of data_config.json and preprocess using map_json
+
+    ### Here we will convert json to code, and then try to deploy it ###
+    req, imp, code = gen_code()
+
+    imp.append("\n\nprint(\"Hello World\")")
+
+    print(code)
+
+    req_path = os.path.join(user_folder, "requirements.txt")
+    imp_path = os.path.join(user_folder, "initialise.py")
+    code_path = os.path.join(user_folder, "trading_code.py")
+
+    with open(req_path, 'w') as file:
+        file.write("\n".join(req))
+
+    # Write each import on a new line
+    with open(imp_path, 'w') as file:
+        file.write("\n".join(imp))
+
+    # Write full code block directly
+    with open(code_path, 'w') as file:
+        file.write(code)
 
     return {"status": "success", "message": "Deployed successfully", "code": 200}

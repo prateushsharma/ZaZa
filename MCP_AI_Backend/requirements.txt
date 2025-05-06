@@ -3,3 +3,5 @@ uvicorn
 redis
 websockets
 docker
+python-dotenv
+groq

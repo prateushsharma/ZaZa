@@ -7,10 +7,15 @@ import uvicorn
 import asyncio
 from server_integrity.assign_loc import create_user
 from server_integrity.update_loc import update_user
-from server_integrity.deploy_loc import deploy_user
+from server_integrity.deploy_loc import graph_to_code
 from server_integrity.fetch_loc import fetch_user_data
 from data_integrity.sui_fetch import initiate_publisher
 from redis_docker_engine.setup_redis import setup_docker_redis_engine
+from user_runtime.reqm_install import handle_req_install
+from user_runtime.reqm_import import handle_req_import
+from user_runtime.code_exec import exec_code
+from user_runtime.fin_deploy import deploy_code
+from user_runtime.stop_exec import kill_code
 import threading
 import time
 
@@ -77,15 +82,36 @@ class DeployRequest(BaseModel):
     password: str
 
 @app.post("/deploy")
-async def deploy_code(request: DeployRequest):
-    output = await deploy_user(request.uid, request.password)
-    return output
+async def deploy_code_from_graph(request: DeployRequest):
+    print("Converting graph to code...")
+    output = await graph_to_code(request.uid, request.password)
+    if output.get("status") != "success":
+        print("Error in graph to code conversion:", output.get("message"))
+        return output
+    print("Graph has been sucessfully deployed to code")
+    print("Installing dependencies...")
+    output = await handle_req_install(request.uid, request.password)
+    if output.get("status") != "success":
+        print("Error in installing dependencies:", output.get("message"))
+        return output
+    print("Dependencies have been installed")
+    print("Checking imports...")
+    output = await handle_req_import(request.uid, request.password)
+    if output.get("status") != "success":
+        print("Error in checking imports:", output.get("message"))
+        return output
+    print("Imports have been checked")
+    print("Finalizing deployment...")
+    output = await deploy_code(request.uid, request.password)
+    if output.get("status") != "success":
+        print("Error in finalizing deployment:", output.get("message"))
+        return output
+    return {"status": "success", "message": "Code executed successfully"}
 
 @app.post("/stop_execution")
 async def stop_execution(request: DeployRequest):
-    # Placeholder for stopping execution logic
-    # This would typically involve sending a stop signal to the running process
-    return {"status": "success", "message": "Execution stopped successfully"}
+    output = await kill_code(request.uid, request.password)
+    return output
 
 class FetchRequest(BaseModel):
     password: str
