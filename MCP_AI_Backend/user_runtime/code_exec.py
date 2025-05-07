@@ -67,7 +67,7 @@ def exec_code(uid: str, password: str) -> dict:
         return {"status": "error", "message": str(e)}
     finally:
         # Force kill the terminal window if it's still open
-        subprocess.call(f'taskkill /fi "WindowTitle eq {window_title}*" /f >nul 2>&1', shell=True)
+        subprocess.call(f'taskkill /fi "WindowTitle eq {window_title}" /f >nul 2>&1', shell=True)
         # Cleanup temporary files
         for f in [log_file, exit_code_file]:
             try:

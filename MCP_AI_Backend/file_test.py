@@ -41,7 +41,7 @@ def launch_full_process():
 def stop_process(window_title):
     try:
         subprocess.run(
-            f'taskkill /FI "WINDOWTITLE eq {window_title}*" /F', 
+            f'taskkill /FI "WINDOWTITLE eq {window_title}" /F', 
             shell=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL

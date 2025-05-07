@@ -21,8 +21,8 @@ async def graph_to_code(uid, password=None):
     with open(code_sync_path, 'r') as file:
         code_sync_data = json.load(file)
 
-    # Check if the "code_updated" field exists in the json and its value
-    if code_sync_data.get("code_updated", False):
+    # Check if the "deploy_status" field exists in the json and its value
+    if code_sync_data.get("deploy_status", False):
         return {"status": "error", "message": "The no code graph is already deployed and no changes are noticed", "code": 400}
 
     # Copy the content of data_config.json and preprocess using map_json

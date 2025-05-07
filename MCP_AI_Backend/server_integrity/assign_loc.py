@@ -45,12 +45,7 @@ def insert_user(cursor, uid, password):
     return True
 
 # Function to handle the entire user creation logic
-async def create_user(config_json: str, password: str):
-    # Parse the config JSON
-    try:
-        config = config_json
-    except json.JSONDecodeError:
-        return {"status": "error", "message": "Invalid JSON input", "code": 400}
+async def create_user(password: str):
     
     retries = 10
     uid = generate_uid()
@@ -58,6 +53,7 @@ async def create_user(config_json: str, password: str):
     conn, cursor = create_db()
 
     for _ in range(retries):
+        # print(f"Attempting to create user with UID: {uid}")
         # Check if the UID already exists in the database
         cursor.execute('SELECT 1 FROM users WHERE uid = ?', (uid,))
         if cursor.fetchone() is None:  # UID does not exist, safe to insert
@@ -75,9 +71,10 @@ async def create_user(config_json: str, password: str):
     user_folder.mkdir(parents=True, exist_ok=True)
 
     code_sync = {
-        "code_updated": False,
-        "code_deployed": False
+        "deploy_status": False
     }
+
+    data_config = {}
 
     # Create the necessary files (without writing any content except init_config.json)
     with open(user_folder / "initialise.py", 'w') as f:
@@ -96,7 +93,7 @@ async def create_user(config_json: str, password: str):
         pass  # Empty file, no content written
     
     with open(user_folder / "data_config.json", 'w') as f:
-        json.dump(config, f, indent=4)  # Write the provided config JSON
+        json.dump(data_config, f, indent=4)
 
     with open(user_folder / "code_sync.json", 'w') as f:
         json.dump(code_sync, f, indent=4) 

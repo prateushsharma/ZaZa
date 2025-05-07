@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 import json
-import json
 import uvicorn
 import asyncio
 from server_integrity.assign_loc import create_user
@@ -31,27 +30,12 @@ app.add_middleware(
 )
 
 class CompileRequest(BaseModel):
-    code: dict
     password: str
 
-    @field_validator('code')
-    def validate_code_is_json(cls, v):
-        # If `v` is a string, try to parse it into a Python dictionary
-        if isinstance(v, str):
-            try:
-                # Attempt to load the string as JSON (convert to dict)
-                v = json.loads(v)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON format: {e}")
-        elif not isinstance(v, dict):
-            # If it's not a string or a dict, raise an error
-            raise ValueError("Code must be a valid JSON object (dictionary).")
-        return v
-
 # /compile endpoint — fully async
-@app.post("/compile")
+@app.post("/get_uid")
 async def compile_code(request: CompileRequest):
-    output = await create_user(request.code, request.password)
+    output = await create_user(request.password)
     return output
 
 class UpdateRequest(BaseModel):
@@ -89,18 +73,21 @@ async def deploy_code_from_graph(request: DeployRequest):
         print("Error in graph to code conversion:", output.get("message"))
         return output
     print("Graph has been sucessfully deployed to code")
+    time.sleep(5)  # Wait for 5 seconds before executing the code
     print("Installing dependencies...")
     output = await handle_req_install(request.uid, request.password)
     if output.get("status") != "success":
         print("Error in installing dependencies:", output.get("message"))
         return output
     print("Dependencies have been installed")
+    time.sleep(5)  # Wait for 5 seconds before executing the code
     print("Checking imports...")
     output = await handle_req_import(request.uid, request.password)
     if output.get("status") != "success":
         print("Error in checking imports:", output.get("message"))
         return output
     print("Imports have been checked")
+    time.sleep(5)  # Wait for 5 seconds before executing the code
     print("Finalizing deployment...")
     output = await deploy_code(request.uid, request.password)
     if output.get("status") != "success":
@@ -137,6 +124,6 @@ def initiate_data_fetch(symbol="SUIUSDT"):
 if __name__ == "__main__":
     print("Starting the FastAPI server...")
     setup_docker_redis_engine()
-    initiate_data_fetch(symbol="SUIUSDT")
+    # initiate_data_fetch(symbol="SUIUSDT") # Uncomment this line to start the WebSocket data fetch
     print("Initialized Server")
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
