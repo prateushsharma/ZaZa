@@ -71,7 +71,10 @@ async def create_user(password: str):
     user_folder.mkdir(parents=True, exist_ok=True)
 
     code_sync = {
-        "deploy_status": False
+        "deploy_status": False,
+        "clone_status": False,
+        "cloned_from_uid": None,
+        "cloned_from_password": None,
     }
 
     data_config = {}

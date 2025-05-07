@@ -1,5 +1,6 @@
 import psutil
 import sqlite3
+import json
 
 async def kill_code(uid: str, password: str):
     try:
@@ -44,7 +45,19 @@ async def kill_code(uid: str, password: str):
         conn.commit()
         conn.close()
 
-        return {"status": "success", "message": f"The code has been terminated successfully"}
+        json_path = f"./user_assets/{uid}/code_sync.json"
+
+        # Read JSON as a Python dictionary
+        with open(json_path, "r") as f:
+            data = json.load(f)
+
+        # Modify the dictionary
+        data["deploy_status"] = False
+
+        # Write it back as JSON
+        with open(json_path, "w") as f:
+            json.dump(data, f, indent=4)
+        return {"status": "success", "message": "The code has been terminated successfully"}
 
     except psutil.NoSuchProcess:
         return {"status": "error", "message": "The process with the given PID does not exist."}

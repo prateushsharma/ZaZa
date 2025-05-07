@@ -1,0 +1,13 @@
+{
+    "nodes": [
+        {
+            "id": "s638",
+            "type": "startNode",
+            "position": {
+                "x": 182,
+                "y": 357
+            },
+            "data": {}
+        }
+    ]
+}
