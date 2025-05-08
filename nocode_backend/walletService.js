@@ -1,12 +1,16 @@
-// walletService.js
 const { Ed25519Keypair } = require('@mysten/sui.js/keypairs/ed25519');
 const { fromB64, toB64 } = require('@mysten/sui.js/utils');
 const { SuiClient } = require('@mysten/sui.js/client');
+const { GraphQLClient, gql } = require('graphql-request');
 
-// Initialize Sui client if needed for balance checks
+// Initialize Sui RPC client (optional, can still use for other endpoints)
 const suiClient = new SuiClient({
   url: process.env.SUI_RPC_URL || 'https://fullnode.testnet.sui.io:443',
 });
+
+// GraphQL endpoint (you should replace with actual endpoint if it's different)
+const GRAPHQL_ENDPOINT = 'https://sui-testnet.mystenlabs.com/graphql'; // example endpoint
+const gqlClient = new GraphQLClient(GRAPHQL_ENDPOINT);
 
 /**
  * Generate a new Sui wallet
@@ -14,15 +18,10 @@ const suiClient = new SuiClient({
  */
 function generateWallet() {
   try {
-    // Generate a new random Ed25519 keypair
     const keypair = new Ed25519Keypair();
-    
-    // Get the private key (as base64)
     const privateKeyBase64 = toB64(keypair.export().privateKey);
-    
-    // Get the public address
     const address = keypair.getPublicKey().toSuiAddress();
-    
+
     return {
       address,
       privateKey: privateKeyBase64
@@ -34,42 +33,50 @@ function generateWallet() {
 }
 
 /**
- * Get the balance of a Sui wallet (placeholder)
+ * Get the balance of a Sui wallet using GraphQL
  * @param {string} address Wallet address
  * @returns {Object} Balance information
  */
 async function getWalletBalance(address) {
+    console.log("Address is: ",address);
   try {
-    // In a complete implementation, this would connect to the Sui blockchain
-    // and fetch the actual balance.
-    
-    // Placeholder response
+    const query = gql`
+      query GetWalletBalance($addr: String!) {
+        address(address: $addr) {
+          address
+          balance {
+            coinType {
+              repr
+            }
+            coinObjectCount
+            totalBalance
+          }
+          coins {
+            nodes {
+              contents {
+                type {
+                  repr
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const variables = { addr: address };
+    const data = await gqlClient.request(query, variables);
+
     return {
-      address,
-      amount: "0" // Placeholder - would be replaced with actual balance fetch
+      address: data.address.address,
+      balance: data.address.balance.totalBalance,
+      coinType: data.address.balance.coinType.repr,
+      coinObjectCount: data.address.balance.coinObjectCount,
+      raw: data // full GraphQL response for reference
     };
-    
-    /* 
-    // This is how you would implement actual balance fetching:
-    const { data: coins } = await suiClient.getCoins({
-      owner: address
-    });
-    
-    // Calculate total balance
-    let totalBalance = 0;
-    for (const coin of coins) {
-      totalBalance += parseInt(coin.balance);
-    }
-    
-    return {
-      address,
-      amount: totalBalance.toString(),
-      coins
-    };
-    */
   } catch (error) {
-    console.error('Error fetching Sui balance:', error);
-    throw new Error('Failed to fetch balance: ' + error.message);
+    console.error('Error fetching wallet balance via GraphQL:', error);
+    throw new Error('Failed to fetch wallet balance: ' + error.message);
   }
 }
 

@@ -37,9 +37,11 @@ app.post('/api/wallet/generate', (req, res) => {
 });
 
 // Get wallet balance
-app.get('/api/wallet/:address/balance', async (req, res) => {
+app.post('/api/wallet/balance', async (req, res) => {
+    
   try {
-    const { address } = req.params;
+    const { address } = req.body;
+    console.log("Get balance api called for: ",address);
     
     // Use the wallet service to get the balance
     const balance = await walletService.getWalletBalance(address);
