@@ -59,7 +59,8 @@ def candle_generator(redis_host='localhost', redis_port=6379, channel='binance_d
         print("🔴 Redis connection closed")
 
 def agent_code(data):
-    pass
+<<>>
+    return decision_to_buy_or_sell
 
 # Example usage
 if __name__ == "__main__":

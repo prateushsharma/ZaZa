@@ -1,29 +1,12 @@
+
+
+print("Hello World")
+
+
 import redis
 import json
 
 def candle_generator(redis_host='localhost', redis_port=6379, channel='binance_data'):
-    """
-    Generator that perfectly matches your publisher's data format:
-    {
-        "timestamp": str,
-        "candlesticks": [
-            {
-                "timestamp": str,
-                "open": float,
-                "high": float,
-                "low": float,
-                "close": float,
-                "volume": float, 
-                "close_time": str,
-                "quote_asset_volume": float,
-                "number_of_trades": int,
-                "taker_buy_base_asset_volume": float,
-                "taker_buy_quote_asset_volume": float
-            },
-            ...
-        ]
-    }
-    """
     r = redis.Redis(host=redis_host, port=redis_port)
     pubsub = r.pubsub()
     pubsub.subscribe(channel)
@@ -59,7 +42,11 @@ def candle_generator(redis_host='localhost', redis_port=6379, channel='binance_d
         print("🔴 Redis connection closed")
 
 def agent_code(data):
-    pass
+    current_price = data['candlesticks'][-1]['close']
+    decision_to_buy_or_sell = current_price == 3.25
+    if current_price == 3.3:
+        decision_to_buy_or_sell = False
+    return decision_to_buy_or_sell
 
 # Example usage
 if __name__ == "__main__":
@@ -69,6 +56,7 @@ if __name__ == "__main__":
                 continue
             
             decision = agent_code(data)
+            print(f"Buy: {decision}")
             # latest = data['candlesticks'][-1]
             # print(f"🕯️ Latest Candle - Close: {latest['close']}, Volume: {latest['volume']}")
             # print("---")
