@@ -40,23 +40,47 @@ def fetch_candlesticks(symbol="SUIUSDT", interval="1m", limit=500):
     
     return parsed
 
+def check_shutdown_event(shutdown_event):
+    if shutdown_event and shutdown_event.is_set():
+        return True
+    return False
+
 # Function to fetch and publish data every minute
-def initiate_publisher(symbol="SUIUSDT"):
+def start_binance_data_publisher(symbol="SUIUSDT", shutdown_event=None):
     iteration = 0
-    while True:
-        iteration += 1
-        # Fetch the last 500 candlesticks for SUIUSDT
-        data = fetch_candlesticks(symbol=symbol, interval="1m", limit=500)
-        print(f"Iteration {iteration}: Fetched {len(data)} candlesticks for {symbol}")
-        # Create a data object with a timestamp indicating when this batch was fetched
-        data_object = {
-            "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            "candlesticks": data  # This will contain all 500 candlesticks as a list
-        }
-        
-        # Publish the entire batch of candlestick data as a single entity
-        # print(f"Publishing data: {data_object}")
-        r.publish(redis_channel, json.dumps(data_object))
-        
-        # Sleep for 1 minute before fetching data again
-        time.sleep(5)
+    print(f"        [INIT] -> 🚀 Starting Publisher on Redis Server")
+
+    try:
+        while not check_shutdown_event(shutdown_event):
+            time.sleep(5)
+            iteration += 1
+
+            try:
+                # Fetch the last 500 candlesticks
+                data = fetch_candlesticks(symbol=symbol, interval="1m", limit=500)
+                if check_shutdown_event(shutdown_event):
+                    break
+                print("---")
+                print(f"[INFO] -> Iteration {iteration}: Retrieved {len(data)} candlestick entries for symbol '{symbol}'.")
+
+                data_object = {
+                    "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    "candlesticks": data
+                }
+
+                try:
+                    r.publish(redis_channel, json.dumps(data_object))
+                    print(f"[INFO] -> 📤 Published: Iter {iteration} on Redis Server")
+                except redis.RedisError as redis_err:
+                    print(f"[ERROR] -> ❌ Redis publish error: {redis_err}")
+
+            except requests.RequestException as req_err:
+                print(f"[ERROR] -> ❌ API request error during iteration {iteration}: {req_err}")
+            except Exception as e:
+                print(f"[ERROR] -> ❌ Unexpected error during iteration {iteration}: {e}")
+
+    except Exception as loop_error:
+        print(f"[ERROR] -> ❌ Publisher loop error: {loop_error}")
+
+    finally:
+        print("[THREAD TERMINATION REQUEST] -> 🔴 PUBLISHER connection closed — termination flag received.")

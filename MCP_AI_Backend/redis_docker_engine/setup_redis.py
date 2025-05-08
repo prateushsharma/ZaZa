@@ -17,12 +17,12 @@ def setup_docker_redis_engine():
     try:
         container = client.containers.get(REDIS_CONTAINER_NAME)
         if container.status != "running":
-            print("🚀 Redis container exists but is not running. Starting it...")
+            print("        [FOUND] 🚀 Redis container exists but is not running. Starting it...")
             container.start()
         else:
-            print("✅ Redis container is already running.")
+            print("        [FOUND] ✅ Redis container is already running.")
     except docker.errors.NotFound:
-        print("📦 Redis container not found. Building and starting using docker-compose...")
+        print("        [FOUND]📦 Redis container not found. Building and starting using docker-compose...")
 
         subprocess.run([
             'docker-compose',
@@ -35,10 +35,10 @@ def setup_docker_redis_engine():
         try:
             r = redis.Redis(host='localhost', port=REDIS_PORT)
             if r.ping():
-                print("✅ Redis is up and ready.")
+                print("        [INFO] ✅ Redis is up and ready.")
                 return
         except redis.exceptions.ConnectionError:
-            print(f"⏳ Waiting for Redis to start... ({i+1}/10)")
+            print(f"        [TIMEOUT] ⏳ Waiting for Redis to start... ({i+1}/10)")
             time.sleep(1)
 
-    raise RuntimeError("❌ Redis started, but did not respond.")
+    raise RuntimeError("        [ERROR] ❌ Redis started, but did not respond.")

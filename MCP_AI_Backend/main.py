@@ -5,13 +5,16 @@ from fastapi.responses import StreamingResponse
 import json
 import uvicorn
 import asyncio
+import uvicorn
+from uvicorn import Config, Server
 from server_integrity.assign_loc import create_user
 from server_integrity.update_loc import update_user
 from server_integrity.deploy_loc import graph_to_code
 from server_integrity.fetch_loc import fetch_user_data
 from server_integrity.clone_loc import clone_code
 from server_integrity.delete_loc import delete_asset
-from data_integrity.sui_fetch import initiate_publisher
+from data_integrity.sui_fetch import start_binance_data_publisher
+from data_integrity.sui_catch import start_binance_data_subscriber
 from redis_docker_engine.setup_redis import setup_docker_redis_engine
 from user_runtime.reqm_install import handle_req_install
 from user_runtime.reqm_import import handle_req_import
@@ -134,22 +137,69 @@ async def delete_data(request: DeployRequest):
     output = await delete_asset(request.uid, request.password)
     return output
 
-# Function to start the WebSocket in a separate daemon thread
-def initiate_data_fetch(symbol="SUIUSDT"):
-    def thread_target():
-        loop = asyncio.new_event_loop()  # Create a new event loop for the thread
-        asyncio.set_event_loop(loop)  # Set this loop for the thread
-        loop.run_until_complete(initiate_publisher(symbol))
+# Shared event to signal shutdown
+shutdown_event = threading.Event()
 
-    # Create and start the thread as a daemon (it will stop automatically when the main program ends)
-    websocket_thread = threading.Thread(target=thread_target, daemon=True)
-    websocket_thread.start()
-    print(f"Started WebSocket data fetch in a background thread for {symbol}")
+# Function to start the WebSocket in a separate daemon thread
+def initiate_publisher(symbol="SUIUSDT"):
+    def thread_target():
+        try:
+            start_binance_data_publisher(symbol=symbol, shutdown_event=shutdown_event)
+        except Exception as e:
+            print(f"[ERROR] ❌ Exception in Publisher thread: {e}")
+        finally:
+            print("[EXIT] 🔁 Publisher Thread Exited.")
+    
+    thread = threading.Thread(target=thread_target, daemon=False) # Use daemon=False to keep the thread alive until the main thread exits
+    thread.start()
+
+
+def initiate_subscriber(shutdown_event):
+    def thread_target():
+        try:
+            start_binance_data_subscriber(shutdown_event)
+        except Exception as e:
+            print(f"[ERROR] ❌ Exception in Subscriber thread: {e}")
+        finally:
+            print("[EXIT] 🔁 Subscriber Thread Exited.")
+    thread = threading.Thread(target=thread_target, daemon=False) # Use daemon=False to keep the thread alive until the main thread exits
+    thread.start()
+
+def stop_all_threads():
+    shutdown_event.set()
+
+async def main():
+    config = Config("main:app", host="0.0.0.0", port=8000, reload=False)
+    server = Server(config)
+    await server.serve()
 
 # Run the app
 if __name__ == "__main__":
-    print("Starting the FastAPI server...")
-    setup_docker_redis_engine()
-    initiate_data_fetch(symbol="SUIUSDT") # Uncomment this line to start the WebSocket data fetch
-    print("Initialized Server")
-    uvicorn.run("main:app", host="0.0.0.0", port=8000)
+    try:
+        print("Starting the FastAPI server...")
+        print("--------------------------------")
+        print("1.")
+        print("    Setting up Redis Docker Engine...")
+        setup_docker_redis_engine()
+        print("    Redis Docker Engine setup complete.")
+        print("2.")
+        print("    Starting Redis Publisher threads...")
+        initiate_publisher(symbol="SUIUSDT") # Uncomment this line to start the WebSocket data fetch
+        print("    Redis Publisher threads started.")
+        print("3.")
+        print("    Setting up Redis Subscriber threads...")
+        initiate_subscriber(shutdown_event=shutdown_event)
+        print("    Redis Subscriber threads started.")
+        print("4.")
+        print("    Initiaiting Uvicorn Server...")
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("---------------------------------")
+        print("Received KeyboardInterrupt. Shutting down...")
+    except Exception as e:
+        print("---------------------------------")
+        print(f"Received Exception: {e}. Shutting down...")
+    
+    print("---------------------------------")
+    stop_all_threads()
+    print("\nForcefully terminating all threads\n")
