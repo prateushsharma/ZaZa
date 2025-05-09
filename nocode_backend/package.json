@@ -12,6 +12,7 @@
   "dependencies": {
     "@mysten/sui": "^1.29.1",
     "@mysten/sui.js": "^0.54.1",
+    "bech32": "^2.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
