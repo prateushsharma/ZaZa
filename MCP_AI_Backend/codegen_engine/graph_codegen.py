@@ -125,7 +125,7 @@ def generate_code_response(json_data) -> Dict[str, Any]:
             }
         ],
         temperature=0.6,
-        max_completion_tokens=1024,
+        max_completion_tokens=4096,
         top_p=0.95,
         stream=False,
         reasoning_format="parsed",
