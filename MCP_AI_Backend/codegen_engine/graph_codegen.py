@@ -10,44 +10,112 @@ class ResponseFormat(BaseModel):
     code: str
 
 
-prompt = """
-    You are an intelligent code assistant. Your job is to generate Python code and provide it in a structured JSON format.
+def get_prompt(json_data):
+    return f"""
+**Objective**: Act as a *strictly compliant* Python 3.11.1 algorithmic trading expert to translate a strategy map (nodes/edges) into executable code. Prioritize dependency accuracy, import correctness, and *absolute adherence to the rules below*.  
 
-    The JSON format must be:
+---
 
-    {
-        "requirements": list of libraries that must be installed using pip (e.g., ["openai", "requests"]),
-        "imports": list of all import statements used in the code (e.g., ["import requests"]),
-        "code": complete code as a string, including imports
-    }
+### **Mandatory Output Format**:  
+```python  
+class ResponseFormat(BaseModel):  
+    requirements: List[str]  # ONLY non-standard pip libraries (e.g., "pandas", "numpy").  
+    imports: List[str]       # EXACT import statements (e.g., "import pandas as pd", "from ta.trend import EMA").  
+    code: str                # PURE strategy logic (NO IMPORTS/COMMENTS/LOOPS).  
+```  
 
-    ---
+---
 
-    Example 1:
+### **Rules**:  
+1. **Python 3.11.1 Exclusivity**:  
+   - All code/compatibility *must* assume **Python 3.11.1**.  
+   - `requirements` must list libraries with **exact PyPI names** compatible with 3.11.1 (e.g., "ta" not "ta-lib").  
 
-    User Query:
-    Write a code that prints 'Hello, World!' in Python in an infinite loop after every 5 seconds. But it also imports openai and requests libraries which is only for testing.
+2. **Data Access**:  
+   - **`data['candlesticks']`** is a **500-candle array** (1m intervals). Each candle has:  
+     ```python  
+     {{  
+        'timestamp': str,
+        'open': float,
+        'high': float,
+        'low': float,
+        'close': float,
+        'volume': float,
+        'close_time': str,
+        'quote_asset_volume': float,
+        'number_of_trades': int,
+        'taker_buy_base_asset_volume': float,
+        'taker_buy_quote_asset_volume': float  
+     }}  
+     ```  
+   - **NEVER** overwrite/modify `data` (e.g., no `data = ...` or `data.append(...)`).  
 
-    Expected JSON Output:
-    {
-        "requirements": ["openai", "requests"],
-        "imports": ["import time", "import openai", "import requests"],
-        "code": "import time\\nimport openai\\nimport requests\\n\\nwhile True:\\n    print('Hello, World!')\\n    time.sleep(5)"
-    }
+3. **Strategy Logic**:  
+   - Use **only** `data['candlesticks'][index][key]` (e.g., `data['candlesticks'][-1]['close']`).  
+   - Generate **`decision_to_buy_or_sell: bool`** (True = buy, False = sell).  
+   - **NO** returns/prints/loops. Assume the code runs in a pre-existing loop.  
 
-    ---
+4. **Dependencies**:  
+   - **`requirements`**:  
+     - **Only** non-standard libraries needing `pip install` (e.g., "pandas", "ta").  
+     - **NEVER** include built-ins (e.g., "time", "json") or deprecated/incompatible packages.  
+   - **`imports`**:  
+     - Include **full import lines** (e.g., `import pandas as pd`, `from ta.volatility import BollingerBands`).  
 
-    Now answer the following query in the same JSON format:
+---
 
-    User Query:
-    Write a Python program that:
-    - simply prints 'Hello, World!' infinitely every 1 second.
+### **Punishment Criteria** (FAILURE = REJECTION):  
+1. Including non-PyPI/invalid library names in `requirements`.  
+2. Adding `pip install` commands or built-in modules to `requirements`.  
+3. Missing/incorrect `imports` (e.g., omitting `import pandas` if used).  
+4. Modifying `data` or using incorrect data keys (e.g., `data['close']` instead of `data['candlesticks'][i]['close']`).  
+5. Deviating from `ResponseFormat` structure or outputting JSON.  
+
+---
+
+### **Example Strategy Map & Output**:  
+**Map**:  
+```  
+######  
+[NODE 1] Buy if SMA(20) > SMA(50)  
+[NODE 2] Sell if SMA(20) < SMA(50)  
+[EDGE] Hold otherwise  
+######  
+```  
+
+**Output**:  
+```python  
+{{
+    "requirements": ["pandas", "ta"],
+    "imports": ["import pandas as pd", "from ta.trend import SMAIndicator"],  
+    "code": "close_prices = [c['close'] for c in data['candlesticks']]  
+sma20 = SMAIndicator(pd.Series(close_prices), window=20).sma_indicator().iloc[-1]  
+sma50 = SMAIndicator(pd.Series(close_prices), window=50).sma_indicator().iloc[-1]  
+decision_to_buy_or_sell = sma20 > sma50  
+"
+}}
+```  
+
+---
+
+**Your Task**:  
+1. Analyze the provided strategy map.  
+2. Generate **`ResponseFormat`** with:  
+   - **Requirements**: Exact PyPI libraries.  
+   - **Imports**: Full import statements.  
+   - **Code**: Strategy logic using `data['candlesticks']` to set `decision_to_buy_or_sell`.  
+
+**Now process this strategy map**:  
+```  
+{json_data}
+```  
+
 """
 
 
-def generate_code_response(prompt: str) -> Dict[str, Any]:
+def generate_code_response(json_data) -> Dict[str, Any]:
     client = Groq()
-
+    prompt = get_prompt(json_data)
     chat_completion = client.chat.completions.create(
         model="deepseek-r1-distill-llama-70b",
         messages=[
@@ -75,8 +143,8 @@ def generate_code_response(prompt: str) -> Dict[str, Any]:
 
 
 # Example of how to use this function:
-def gen_code(prompt=prompt) -> tuple[list[str], list[str], str]:
-    result = generate_code_response(prompt)
+def gen_code(json_data) -> tuple[list[str], list[str], str]:
+    result = generate_code_response(json_data)
     
     # Extract the values from the ResponseFormat model
     requirements = result.requirements
@@ -84,7 +152,7 @@ def gen_code(prompt=prompt) -> tuple[list[str], list[str], str]:
     code = result.code
 
     # Pretty-print the entire structure if needed
-    print(json.dumps(result.dict(), indent=4))
+    # print(json.dumps(result.dict(), indent=4))
     
     # Return the tuple
     return requirements, imports, code

@@ -1,5 +1,5 @@
 import json
-from graph_preprocess import filter_workflow_json
+from utils.graph_preprocess import filter_workflow_json
 
 def map_json(graph):
     graph_json = filter_workflow_json(graph)

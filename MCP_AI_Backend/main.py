@@ -137,6 +137,15 @@ async def delete_data(request: DeployRequest):
     output = await delete_asset(request.uid, request.password)
     return output
 
+class TempRequest(BaseModel):
+    uid: str
+    password: str
+
+@app.post("/spec_run")
+async def spec_run():
+    output = await deploy_code("TvUiWLQo7e", "abcd")
+    return output
+
 # Shared event to signal shutdown
 shutdown_event = threading.Event()
 
@@ -186,10 +195,10 @@ if __name__ == "__main__":
         print("    Starting Redis Publisher threads...")
         initiate_publisher(symbol="SUIUSDT") # Uncomment this line to start the WebSocket data fetch
         print("    Redis Publisher threads started.")
-        print("3.")
-        print("    Setting up Redis Subscriber threads...")
-        initiate_subscriber(shutdown_event=shutdown_event)
-        print("    Redis Subscriber threads started.")
+        # print("3.")
+        # print("    Setting up Redis Subscriber threads...")
+        # initiate_subscriber(shutdown_event=shutdown_event)
+        # print("    Redis Subscriber threads started.")
         print("4.")
         print("    Initiaiting Uvicorn Server...")
         asyncio.run(main())

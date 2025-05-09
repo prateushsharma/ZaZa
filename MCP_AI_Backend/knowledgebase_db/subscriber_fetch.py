@@ -13,7 +13,7 @@ def candle_generator(redis_host='localhost', redis_port=6379, channel='binance_d
                 "high": float,
                 "low": float,
                 "close": float,
-                "volume": float, 
+                "volume": float,
                 "close_time": str,
                 "quote_asset_volume": float,
                 "number_of_trades": int,
@@ -57,23 +57,3 @@ def candle_generator(redis_host='localhost', redis_port=6379, channel='binance_d
     finally:
         pubsub.close()
         print("🔴 Redis connection closed")
-
-def agent_code(data):
-    pass
-
-# Example usage
-if __name__ == "__main__":
-    try:
-        for data in candle_generator():
-            if not data.get('candlesticks'):
-                continue
-            
-            decision = agent_code(data)
-            # latest = data['candlesticks'][-1]
-            # print(f"🕯️ Latest Candle - Close: {latest['close']}, Volume: {latest['volume']}")
-            # print("---")
-            
-    except KeyboardInterrupt:
-        print("\n🛑 Stopped by user")
-    except Exception as e:
-        print(f"💥 Fatal error: {e}")
