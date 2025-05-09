@@ -37,6 +37,11 @@ app.post('/api/wallet/generate', (req, res) => {
 });
 
 // Get wallet balance
+/** 
+ {
+ "address":"0x....." 
+ }
+ */
 app.post('/api/wallet/balance', async (req, res) => {
     
   try {
