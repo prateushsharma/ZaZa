@@ -38,12 +38,15 @@ function generateWallet() {
   try {
    
     const keypair = Ed25519Keypair.generate();
-  
+    
     const address = keypair.getPublicKey().toSuiAddress()
     console.log("Address: ",address);
+    const secretKey = keypair.getSecretKey();
     return {
       address,
       privateKey: keypair,
+      secretKey:secretKey
+
     }
   } catch (error) {
     console.error('Error generating Sui wallet:', error);
