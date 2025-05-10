@@ -4,7 +4,7 @@ import { Handle } from 'reactflow';
 import { BsDatabase } from 'react-icons/bs';
 import '../../styles/Nodes.css';
 
-const MemoryNode = ({ data }) => {
+const MemoryNode = ({ data, id }) => {
   const memoryTypes = [
     { id: 'postgres', name: 'PostgreSQL' },
     { id: 'redis', name: 'Redis' },
@@ -12,10 +12,20 @@ const MemoryNode = ({ data }) => {
     { id: 'mongodb', name: 'MongoDB' }
   ];
   
-  const [selectedType, setSelectedType] = useState('');
+  const [selectedType, setSelectedType] = useState(data.selectedType || '');
+  
+  // Direct update to ensure data is captured
+  const handleTypeChange = (e) => {
+    const type = e.target.value;
+    setSelectedType(type);
+    data.selectedType = type; // Update data directly
+    
+    // Log to confirm data is updated
+    console.log('Updated memory data:', data);
+  };
   
   return (
-    <div className="custom-node memory-node">
+    <div className="custom-node memory-node" data-id={id}>
       <Handle
         type="target"
         position="left"
@@ -31,7 +41,7 @@ const MemoryNode = ({ data }) => {
           <label>Memory Type</label>
           <select
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
+            onChange={handleTypeChange}
             className="select-input"
           >
             <option value="">Select a memory type</option>

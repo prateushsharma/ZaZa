@@ -18,7 +18,9 @@ import {
   BsZoomIn, 
   BsZoomOut,
   BsArrowsFullscreen,
-  BsCodeSlash
+  BsCodeSlash,
+  BsDownload,
+  BsXLg
 } from 'react-icons/bs';
 import '../styles/FlowCanvas.css';
 import { useAgentStore } from '../store/agentStore';
@@ -30,6 +32,8 @@ const FlowCanvas = ({ onDeploy }) => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [flowName, setFlowName] = useState('');
   const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportedJson, setExportedJson] = useState('');
   
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
@@ -63,56 +67,57 @@ const FlowCanvas = ({ onDeploy }) => {
   }, []);
 
   // Function to add a child node to an agent node
-  const onAddChildNode = useCallback((parentId, childType) => {
-    // Find parent node
-    const parentNode = nodes.find(node => node.id === parentId);
-    if (!parentNode) return;
-    
-    // Get parent position
-    const parentX = parentNode.position.x;
-    const parentY = parentNode.position.y;
-    const parentWidth = 500; // Width of agent node
-    
-    // Determine offset for child node based on type
-    let offsetX = 0;
-    if (childType === 'modelNode') offsetX = -parentWidth/3;
-    else if (childType === 'memoryNode') offsetX = 0;
-    else if (childType === 'toolNode') offsetX = parentWidth/3;
-    
-    // Calculate position for child node (directly below parent)
-    const childX = parentX + offsetX;
-    const childY = parentY + 250; // Position below the parent node
-    
-    // Create new child node
-    const newChildNode = {
-      id: `${childType}-${Date.now()}`,
-      type: childType,
-      position: { x: childX, y: childY },
-      data: { 
-        label: childType.replace('Node', ''),
-        parentId: parentId
-      },
-    };
-    
-    // Create edge connecting parent to child with dashed line
-    const newEdge = {
-      id: `e-${parentId}-${newChildNode.id}`,
-      source: parentId,
-      sourceHandle: childType.replace('Node', '-out'), // Match the handle ID in AgentNode
-      target: newChildNode.id,
-      targetHandle: childType.replace('Node', '-in'), // Match the handle ID in child node
-      type: 'smoothstep',
-      style: { 
-        strokeWidth: 2, 
-        stroke: '#8C9EFF',
-        strokeDasharray: '5,5' // Creates dashed line
-      }
-    };
-    
-    // Update nodes and edges
-    setNodes((nds) => [...nds, newChildNode]);
-    setEdges((eds) => [...eds, newEdge]);
-  }, [nodes]);
+  // Function to add a child node to an agent node - updated with correct handle IDs
+const onAddChildNode = useCallback((parentId, childType) => {
+  // Find parent node
+  const parentNode = nodes.find(node => node.id === parentId);
+  if (!parentNode) return;
+  
+  // Get parent position
+  const parentX = parentNode.position.x;
+  const parentY = parentNode.position.y;
+  const parentWidth = 500; // Width of agent node
+  
+  // Determine offset for child node based on type
+  let offsetX = 0;
+  if (childType === 'modelNode') offsetX = -parentWidth/3;
+  else if (childType === 'memoryNode') offsetX = 0;
+  else if (childType === 'toolNode') offsetX = parentWidth/3;
+  
+  // Calculate position for child node (directly below parent)
+  const childX = parentX + offsetX;
+  const childY = parentY + 250; // Position below the parent node
+  
+  // Create new child node
+  const newChildNode = {
+    id: `${childType}-${Date.now()}`,
+    type: childType,
+    position: { x: childX, y: childY },
+    data: { 
+      label: childType.replace('Node', ''),
+      parentId: parentId
+    },
+  };
+  
+  // Create edge connecting parent to child with dashed line using correct handle IDs
+  const newEdge = {
+    id: `e-${parentId}-${newChildNode.id}`,
+    source: parentId,
+    sourceHandle: childType.replace('Node', '-out'), // Consistently use '-out' suffix
+    target: newChildNode.id,
+    targetHandle: childType.replace('Node', '-in'), 
+    type: 'smoothstep',
+    style: { 
+      strokeWidth: 2, 
+      stroke: '#5e72e4',
+      strokeDasharray: '5,5' // Creates dashed line
+    }
+  };
+  
+  // Update nodes and edges
+  setNodes((nds) => [...nds, newChildNode]);
+  setEdges((eds) => [...eds, newEdge]);
+}, [nodes]);
 
   // Handle dropping new nodes onto the canvas
   const onDrop = useCallback((event) => {
@@ -255,6 +260,158 @@ const FlowCanvas = ({ onDeploy }) => {
     }
   };
 
+  // Export flow as JSON - No hard-coded values
+ // Export flow as JSON - Fixed with debugging
+// Export flow as JSON - Final comprehensive version
+const handleExportFlow = () => {
+  if (!nodes.length) {
+    alert('No flow to export. Please add some nodes first.');
+    return;
+  }
+
+  // Format nodes and extract their data
+  const formattedNodes = nodes.map(node => {
+    // Create a clean copy of the node data
+    let nodeData = {};
+    
+    // Extract data based on node type with improved handling
+    if (node.type === 'agentNode') {
+      // For agent nodes, check for name and description
+      if (node.data.name) nodeData.name = node.data.name;
+      if (node.data.description) nodeData.description = node.data.description;
+      
+      // Log for debugging
+      console.log('Agent node data:', node.data);
+    } else if (node.type === 'strategyNode') {
+      // For strategy nodes, get strategy text
+      if (node.data.strategyText) nodeData.strategyText = node.data.strategyText;
+      
+      // Log for debugging
+      console.log('Strategy node data:', node.data);
+    } else if (node.type === 'modelNode') {
+      // For model nodes, get selected model and parent ID
+      if (node.data.selectedModel) nodeData.model = node.data.selectedModel;
+      if (node.data.parentId) nodeData.parentId = node.data.parentId;
+      
+      // Log for debugging
+      console.log('Model node data:', node.data);
+    } else if (node.type === 'memoryNode') {
+      // For memory nodes, get memory type and parent ID
+      if (node.data.selectedType) nodeData.memoryType = node.data.selectedType;
+      if (node.data.parentId) nodeData.parentId = node.data.parentId;
+      
+      // Log for debugging
+      console.log('Memory node data:', node.data);
+    } else if (node.type === 'toolNode') {
+      // For tool nodes, get tool type, params, and parent ID
+      if (node.data.selectedTool) nodeData.toolType = node.data.selectedTool;
+      if (node.data.toolParams) nodeData.params = node.data.toolParams;
+      if (node.data.parentId) nodeData.parentId = node.data.parentId;
+      
+      // Log for debugging
+      console.log('Tool node data:', node.data);
+    } else if (node.type === 'notificationNode') {
+      // For notification nodes, get message
+      if (node.data.message) nodeData.message = node.data.message;
+      
+      // Log for debugging
+      console.log('Notification node data:', node.data);
+    } else if (node.type === 'paymentNode') {
+      // For payment nodes, get address and amount
+      if (node.data.address) nodeData.address = node.data.address;
+      if (node.data.amount) nodeData.amount = node.data.amount;
+      
+      // Log for debugging
+      console.log('Payment node data:', node.data);
+    } else {
+      // For any other node type, include all data
+      Object.keys(node.data).forEach(key => {
+        // Skip internal properties like onAddChildNode
+        if (key !== 'onAddChildNode' && key !== 'label') {
+          nodeData[key] = node.data[key];
+        }
+      });
+    }
+    
+    return {
+      id: node.id,
+      type: node.type,
+      position: { x: node.position.x, y: node.position.y },
+      data: nodeData
+    };
+  });
+  
+  // Format the edges with fixed handles
+  const formattedEdges = edges.map(edge => {
+    const edgeData = {
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+      type: edge.type
+    };
+    
+    // Fix handle names if needed and add to edge data
+    if (edge.sourceHandle) {
+      // Make sure we're using consistent handles
+      let sourceHandle = edge.sourceHandle;
+      
+      // Convert 'connect' to 'out' if needed
+      if (sourceHandle === 'model-connect') sourceHandle = 'model-out';
+      if (sourceHandle === 'memory-connect') sourceHandle = 'memory-out';
+      if (sourceHandle === 'tool-connect') sourceHandle = 'tool-out';
+      
+      edgeData.sourceHandle = sourceHandle;
+    }
+    
+    if (edge.targetHandle) {
+      edgeData.targetHandle = edge.targetHandle;
+    }
+    
+    // Add style if it exists
+    if (edge.style) {
+      edgeData.style = {};
+      if (edge.style.strokeWidth) edgeData.style.strokeWidth = edge.style.strokeWidth;
+      if (edge.style.stroke) edgeData.style.stroke = edge.style.stroke;
+      if (edge.style.strokeDasharray) edgeData.style.strokeDasharray = edge.style.strokeDasharray;
+    }
+    
+    return edgeData;
+  });
+  
+  // Format the flow object
+  const flowJson = {
+    workflowId: "workflow-" + Date.now(),
+    name: flowName || "SUI Trading Agent Workflow",
+    description: "Automated trading workflow for SUI tokens",
+    nodes: formattedNodes,
+    edges: formattedEdges
+  };
+  
+  // Generate the JSON string with pretty formatting
+  const jsonString = JSON.stringify(flowJson, null, 2);
+  setExportedJson(jsonString);
+  setShowExportModal(true);
+};
+
+  // Download the JSON file
+  const handleDownloadJson = () => {
+    const blob = new Blob([exportedJson], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // Use flow name if available, otherwise use a default name
+    const fileName = flowName 
+      ? `${flowName.replace(/\s+/g, '-').toLowerCase()}.json` 
+      : 'trading-workflow.json';
+      
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flow-canvas" ref={reactFlowWrapper}>
       {showNamePrompt && (
@@ -316,6 +473,13 @@ const FlowCanvas = ({ onDeploy }) => {
             <BsArrowsFullscreen />
           </button>
           <button 
+            onClick={handleExportFlow}
+            title="Export to JSON"
+            className="export-btn"
+          >
+            <BsCodeSlash /> Export JSON
+          </button>
+          <button 
             className="deploy-btn"
             onClick={handleDeploy}
             disabled={isDeploying}
@@ -355,6 +519,45 @@ const FlowCanvas = ({ onDeploy }) => {
           nodeBorderRadius={2}
         />
       </ReactFlow>
+
+      {/* Export JSON Modal */}
+      {showExportModal && (
+        <div className="export-modal-overlay">
+          <div className="export-modal">
+            <div className="export-modal-header">
+              <h3>Workflow JSON</h3>
+              <button 
+                className="close-modal-btn"
+                onClick={() => setShowExportModal(false)}
+              >
+                <BsXLg />
+              </button>
+            </div>
+            <div className="export-modal-content">
+              <div className="json-container">
+                <pre>{exportedJson}</pre>
+              </div>
+            </div>
+            <div className="export-modal-footer">
+              <button 
+                className="download-json-btn"
+                onClick={handleDownloadJson}
+              >
+                <BsDownload /> Download JSON
+              </button>
+              <button 
+                className="copy-json-btn"
+                onClick={() => {
+                  navigator.clipboard.writeText(exportedJson);
+                  alert('JSON copied to clipboard!');
+                }}
+              >
+                Copy to Clipboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

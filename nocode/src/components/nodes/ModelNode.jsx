@@ -4,7 +4,7 @@ import { Handle } from 'reactflow';
 import { BsCpu } from 'react-icons/bs';
 import '../../styles/Nodes.css';
 
-const ModelNode = ({ data }) => {
+const ModelNode = ({ data, id }) => {
   const models = [
     { id: 'claude', name: 'Anthropic Claude' },
     { id: 'gpt4', name: 'OpenAI GPT-4' },
@@ -12,10 +12,20 @@ const ModelNode = ({ data }) => {
     { id: 'gemini', name: 'Google Gemini' }
   ];
   
-  const [selectedModel, setSelectedModel] = useState('');
+  const [selectedModel, setSelectedModel] = useState(data.selectedModel || '');
+  
+  // Direct update to ensure data is captured
+  const handleModelChange = (e) => {
+    const model = e.target.value;
+    setSelectedModel(model);
+    data.selectedModel = model; // Update data directly
+    
+    // Log to confirm data is updated
+    console.log('Updated model data:', data);
+  };
   
   return (
-    <div className="custom-node model-node">
+    <div className="custom-node model-node" data-id={id}>
       <Handle
         type="target"
         position="left"
@@ -31,7 +41,7 @@ const ModelNode = ({ data }) => {
           <label>AI Model</label>
           <select
             value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
+            onChange={handleModelChange}
             className="select-input"
           >
             <option value="">Select a model</option>

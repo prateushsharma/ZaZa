@@ -4,14 +4,20 @@ import FlowCanvas from './components/FlowCanvas';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import { BsRobot, BsDiagram3 } from 'react-icons/bs';
+import { ConnectButton } from '@mysten/dapp-kit';
+
+// import {  WalletProvider } from '@mysten/dapp-kit';
+// import { ConnectButton } from '@mysten/dapp-kit';
 import './styles/App.css';
 
 function App() {
   const [view, setView] = useState('flowBuilder'); // 'flowBuilder' or 'dashboard'
   
   return (
+    
     <div className="app">
       <div className="app-header">
+      <ConnectButton />
         <div className="app-title">DeFAI Agent Deployer ⚡</div>
         <div className="view-switcher">
           <button 
@@ -40,6 +46,7 @@ function App() {
         )}
       </div>
     </div>
+    
   );
 }
 

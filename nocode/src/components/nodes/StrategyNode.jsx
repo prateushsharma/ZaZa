@@ -1,12 +1,19 @@
 // src/components/nodes/StrategyNode.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Handle } from 'reactflow';
 import { BsLightbulb } from 'react-icons/bs';
 import '../../styles/Nodes.css';
 
-const StrategyNode = ({ data }) => {
-  const [strategyText, setStrategyText] = useState('');
-  const [temperature, setTemperature] = useState('0.7');
+const StrategyNode = ({ data, id }) => {
+  const [strategyText, setStrategyText] = useState(data.strategyText || '');
+  
+  // Update the node data when input values change
+  useEffect(() => {
+    data.strategyText = strategyText;
+    
+    // Log to ensure data is being updated
+    console.log('Strategy data updated:', data);
+  }, [strategyText, data]);
   
   return (
     <div className="custom-node strategy-node">
@@ -22,11 +29,11 @@ const StrategyNode = ({ data }) => {
       </div>
       <div className="node-content">
         <div className="input-group">
-          <label>Writing Strategy</label>
+          <label>Trading Strategy</label>
           <textarea
             value={strategyText}
             onChange={(e) => setStrategyText(e.target.value)}
-            placeholder="Enter writing instructions for the agent..."
+            placeholder="Enter trading strategy instructions..."
             rows={4}
           />
         </div>
