@@ -3,21 +3,29 @@ import React, { useState } from 'react';
 import FlowCanvas from './components/FlowCanvas';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
+import LandingPage from './components/LandingPage';
 import { BsRobot, BsDiagram3 } from 'react-icons/bs';
 import { ConnectButton } from '@mysten/dapp-kit';
-
-// import {  WalletProvider } from '@mysten/dapp-kit';
-// import { ConnectButton } from '@mysten/dapp-kit';
 import './styles/App.css';
 
 function App() {
-  const [view, setView] = useState('flowBuilder'); // 'flowBuilder' or 'dashboard'
+  const [view, setView] = useState('landing'); // 'landing', 'flowBuilder', or 'dashboard'
   
+  // Handler for entering the main app from landing page
+  const handleEnterApp = () => {
+    setView('flowBuilder');
+  };
+  
+  // If on landing page, show only the landing page
+  if (view === 'landing') {
+    return <LandingPage onEnterApp={handleEnterApp} />;
+  }
+  
+  // Otherwise show the main app (flowBuilder or dashboard)
   return (
-    
     <div className="app">
       <div className="app-header">
-      <ConnectButton />
+        <ConnectButton />
         <div className="app-title">DeFAI Agent Deployer ⚡</div>
         <div className="view-switcher">
           <button 
@@ -46,7 +54,6 @@ function App() {
         )}
       </div>
     </div>
-    
   );
 }
 
