@@ -6,3 +6,4 @@ docker
 python-dotenv
 groq
 watchfiles
+psutil
