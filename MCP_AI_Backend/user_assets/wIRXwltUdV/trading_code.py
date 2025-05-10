@@ -1,3 +1,4 @@
+import pandas as pd
 
 
 print("Hello World")
@@ -42,10 +43,14 @@ def candle_generator(redis_host='localhost', redis_port=6379, channel='binance_d
         print("🔴 Redis connection closed")
 
 def agent_code(data):
-    current_price = data['candlesticks'][-1]['close']
-    decision_to_buy_or_sell = current_price == 3.25
-    if current_price == 3.3:
-        decision_to_buy_or_sell = False
+    close_prices = [c['close'] for c in data['candlesticks']]
+    last_close = close_prices[-1]
+    if last_close == 3.25:
+        decision_to_buy_or_sell = 'buy'
+    elif last_close == 3.3:
+        decision_to_buy_or_sell = 'sell'
+    else:
+        decision_to_buy_or_sell = 'hold'
     return decision_to_buy_or_sell
 
 # Example usage
@@ -56,7 +61,7 @@ if __name__ == "__main__":
                 continue
             
             decision = agent_code(data)
-            print(f"Buy: {decision}")
+            print(f"Decision: {decision}")
             # latest = data['candlesticks'][-1]
             # print(f"🕯️ Latest Candle - Close: {latest['close']}, Volume: {latest['volume']}")
             # print("---")

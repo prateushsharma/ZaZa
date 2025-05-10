@@ -72,39 +72,45 @@ class DeployRequest(BaseModel):
     password: str
 
 @app.post("/deploy")
-async def deploy_code_from_graph(request: Request):
-    data = await request.json()
-    req = DeployRequest(uid=data["uid"], password=data["password"])
-
+async def deploy_code_from_graph(request: DeployRequest):
     async def stream():
-        yield "Initiating graph to code conversion...\n"
-        output = await graph_to_code(req.uid, req.password)
-        if output.get("status") != "success":
-            yield f"Error in graph to code conversion: {output.get('message')}\n"
-            return
-        yield "Graph to code conversion complete.\n"
+        success = False
+        for i in range(1,7):
+            if(i == 1):
+                yield "Initiating deployment...\n"
+            else:
+                yield f"Re-initiating deployment... Attempt {i-1}/5\n"
+            yield "Initiating graph to code conversion...\n"
+            output = await graph_to_code(request.uid, request.password)
+            if output.get("status") != "success":
+                yield f"Error in graph to code conversion: {output.get('message')}\n"
+                continue
+            yield "Graph to code conversion complete.\n"
 
-        yield "Installing dependencies...\n"
-        output = await handle_req_install(req.uid, req.password)
-        if output.get("status") != "success":
-            yield f"Error in installing dependencies: {output.get('message')}\n"
-            return
-        yield "Dependencies successfully installed.\n"
+            yield "Installing dependencies...\n"
+            output = await handle_req_install(request.uid, request.password)
+            if output.get("status") != "success":
+                yield f"Error in installing dependencies: {output.get('message')}\n"
+                continue
+            yield "Dependencies successfully installed.\n"
 
-        yield "Checking import compatibility...\n"
-        output = await handle_req_import(req.uid, req.password)
-        if output.get("status") != "success":
-            yield f"Error in checking imports: {output.get('message')}\n"
-            return
-        yield "Imports successfully compiled.\n"
+            yield "Checking import compatibility...\n"
+            output = await handle_req_import(request.uid, request.password)
+            if output.get("status") != "success":
+                yield f"Error in checking imports: {output.get('message')}\n"
+                continue
+            yield "Imports successfully compiled.\n"
 
-        yield "Initiating code execution...\n"
-        output = await deploy_code(req.uid, req.password)
-        if output.get("status") != "success":
-            yield f"Error in finalizing deployment: {output.get('message')}\n"
-            return
-        yield "Code has been successfully executed and deployed.\n"
-
+            yield "Initiating code execution...\n"
+            output = await deploy_code(request.uid, request.password)
+            if output.get("status") != "success":
+                yield f"Error in finalizing deployment: {output.get('message')}\n"
+                continue
+            yield "Code has been successfully executed and deployed.\n"
+            success = True
+            break
+        if not success:
+            yield "Graph deployment unsuccessful after 5 retry attempts, please try again later while we fix the server issue\n"
     return StreamingResponse(stream(), media_type="text/plain")
 
 @app.post("/stop_execution")

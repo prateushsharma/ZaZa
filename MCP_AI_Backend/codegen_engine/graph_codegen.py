@@ -52,7 +52,7 @@ class ResponseFormat(BaseModel):
 
 3. **Strategy Logic**:  
    - Use **only** `data['candlesticks'][index][key]` (e.g., `data['candlesticks'][-1]['close']`).  
-   - Generate **`decision_to_buy_or_sell: bool`** (True = buy, False = sell).  
+   - Generate **`decision_to_buy_or_sell: str`** ("buy" or "sell" or "hold", nothing else).  
    - **NO** returns/prints/loops. Assume the code runs in a pre-existing loop.  
 
 4. **Dependencies**:  
@@ -91,7 +91,12 @@ class ResponseFormat(BaseModel):
     "code": "close_prices = [c['close'] for c in data['candlesticks']]  
 sma20 = SMAIndicator(pd.Series(close_prices), window=20).sma_indicator().iloc[-1]  
 sma50 = SMAIndicator(pd.Series(close_prices), window=50).sma_indicator().iloc[-1]  
-decision_to_buy_or_sell = sma20 > sma50  
+if sma20 > sma50:
+    decision_to_buy_or_sell = "buy"
+elif sma20 < sma50:
+    decision_to_buy_or_sell = "sell"
+else:
+    decision_to_buy_or_sell = "hold"  
 "
 }}
 ```  
@@ -125,7 +130,7 @@ def generate_code_response(json_data) -> Dict[str, Any]:
             }
         ],
         temperature=0.6,
-        max_completion_tokens=1024,
+        max_completion_tokens=4096,
         top_p=0.95,
         stream=False,
         reasoning_format="parsed",
