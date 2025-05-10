@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
+from enum import Enum
 from fastapi.responses import StreamingResponse
 import json
 import uvicorn
@@ -73,11 +74,17 @@ class DeployRequest(BaseModel):
     uid: str
     password: str
 
+class RiskLevel(str, Enum):
+    low = "low"
+    med = "med"
+    high = "high"
+
 class ActDeployRequest(BaseModel):
     uid: str
     password: str   
     profit: float
     loss: float
+    risk: RiskLevel
     
 @app.post("/deploy")
 async def deploy_code_from_graph(request: ActDeployRequest):
@@ -98,7 +105,7 @@ async def deploy_code_from_graph(request: ActDeployRequest):
             else:
                 yield f"[WALLET FOUND] Wallet already initialized.\n"
             yield "[GRAPH SYNC] Initiating graph to code conversion...\n"
-            output = await graph_to_code(request.uid, request.password)
+            output = await graph_to_code(request.uid, request.password, request.risk)
             if output.get("status") != "success":
                 yield f"[GRAPH FAILURE] Error in graph to code conversion: {output.get('message')}\n"
                 continue
