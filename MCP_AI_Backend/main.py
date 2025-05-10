@@ -13,11 +13,13 @@ from server_integrity.deploy_loc import graph_to_code
 from server_integrity.fetch_loc import fetch_user_data
 from server_integrity.clone_loc import clone_code
 from server_integrity.delete_loc import delete_asset
+from server_integrity.fetch_log import get_datalogs
 from data_integrity.sui_fetch import start_binance_data_publisher
 from data_integrity.sui_catch import start_binance_data_subscriber
 from redis_docker_engine.setup_redis import setup_docker_redis_engine
 from user_runtime.reqm_install import handle_req_install
 from user_runtime.reqm_import import handle_req_import
+from user_runtime.wallet_check import ensure_wallet
 # from user_runtime.code_exec import exec_code
 from user_runtime.fin_deploy import deploy_code
 from user_runtime.stop_exec import kill_code
@@ -71,46 +73,63 @@ class DeployRequest(BaseModel):
     uid: str
     password: str
 
+class ActDeployRequest(BaseModel):
+    uid: str
+    password: str   
+    profit: float
+    loss: float
+    
 @app.post("/deploy")
-async def deploy_code_from_graph(request: DeployRequest):
+async def deploy_code_from_graph(request: ActDeployRequest):
     async def stream():
         success = False
         for i in range(1,7):
             if(i == 1):
-                yield "Initiating deployment...\n"
+                yield "[DEPLOY] Initiating deployment...\n"
             else:
-                yield f"Re-initiating deployment... Attempt {i-1}/5\n"
-            yield "Initiating graph to code conversion...\n"
+                yield f"[DEPLOY RETRY] Re-initiating deployment... Attempt {i-1}/5\n"
+            yield "[WALLET SYNC] Initiating Wallet Verification\n"
+            output = await ensure_wallet(request.uid)
+            if output.get("status") != "success":
+                yield f"[WALLET FAILURE] Error in ensuring wallet: {output.get('message')}\n"
+                continue
+            if output.get("update"):
+                yield f"[WALLET SUCCESS] Wallet successfully initialized.\n"
+            else:
+                yield f"[WALLET FOUND] Wallet already initialized.\n"
+            yield "[GRAPH SYNC] Initiating graph to code conversion...\n"
             output = await graph_to_code(request.uid, request.password)
             if output.get("status") != "success":
-                yield f"Error in graph to code conversion: {output.get('message')}\n"
+                yield f"[GRAPH FAILURE] Error in graph to code conversion: {output.get('message')}\n"
                 continue
-            yield "Graph to code conversion complete.\n"
+            yield "[GRAPH SUCCESS] Graph to code conversion complete.\n"
 
-            yield "Installing dependencies...\n"
+            yield "[INSTALL SYNC] Installing dependencies...\n"
             output = await handle_req_install(request.uid, request.password)
             if output.get("status") != "success":
-                yield f"Error in installing dependencies: {output.get('message')}\n"
+                yield f"[INSTALL FAILURE] Error in installing dependencies: {output.get('message')}\n"
                 continue
-            yield "Dependencies successfully installed.\n"
+            yield "[INSTALL SUCCESS] Dependencies successfully installed.\n"
 
-            yield "Checking import compatibility...\n"
+            yield "[IMPORT SYNC] Checking import compatibility...\n"
             output = await handle_req_import(request.uid, request.password)
             if output.get("status") != "success":
-                yield f"Error in checking imports: {output.get('message')}\n"
+                yield f"[IMPORT FAILURE] Error in checking imports: {output.get('message')}\n"
                 continue
-            yield "Imports successfully compiled.\n"
+            yield "[IMPORT SUCCESS] Imports successfully compiled.\n"
 
-            yield "Initiating code execution...\n"
+            yield "[EXECUTION SYNC] Initiating code execution...\n"
             output = await deploy_code(request.uid, request.password)
             if output.get("status") != "success":
-                yield f"Error in finalizing deployment: {output.get('message')}\n"
+                yield f"[EXECUTION FAILURE] Error in finalizing deployment: {output.get('message')}\n"
                 continue
-            yield "Code has been successfully executed and deployed.\n"
+            yield "[EXECUTION SUCCESS] Code has been successfully executed.\n"
             success = True
             break
+        if success:
+            yield "[DEPLOY SUCCESS] Graph deployment is successful.\n"
         if not success:
-            yield "Graph deployment unsuccessful after 5 retry attempts, please try again later while we fix the server issue\n"
+            yield "[DEPLOY FAILURE] Graph deployment unsuccessful after 5 retry attempts, please try again later while we fix the server issue\n"
     return StreamingResponse(stream(), media_type="text/plain")
 
 @app.post("/stop_execution")
@@ -136,6 +155,15 @@ async def clone_asset(request: CloneRequest):
     gen_uid = await create_user(request.password_to)
     uid_to = gen_uid["uid"]
     output = await clone_code(uid_to, request.password_to, request.uid_from, request.password_from)
+    return output
+
+class FetchLogRequest(BaseModel):
+    uid: str
+    password: str
+
+@app.post("/fetch_logs")
+async def fetch_logs(request: FetchLogRequest):
+    output = await get_datalogs(request.uid, request.password)
     return output
 
 @app.post("/delete")
@@ -205,7 +233,7 @@ if __name__ == "__main__":
         # print("    Setting up Redis Subscriber threads...")
         # initiate_subscriber(shutdown_event=shutdown_event)
         # print("    Redis Subscriber threads started.")
-        print("4.")
+        print("3.")
         print("    Initiaiting Uvicorn Server...")
         asyncio.run(main())
     except KeyboardInterrupt:

@@ -1,12 +1,6 @@
-import os
-import json
-import sys
+import pandas as pd
 
-sys.path.append('..')
-from codegen_engine.graph_codegen import gen_code
-from utils.json_to_map import map_json
 
-placeholder_code = """
 import os
 import redis
 import json
@@ -113,12 +107,125 @@ def candle_generator(redis_host='localhost', redis_port=6379, channel='binance_d
         print("🔴 Redis connection closed")
 
 def agent_code(data):
-<<>>
+    close_price = data['candlesticks'][-1]['close']
+    if close_price == 3.25:
+        decision_to_buy_or_sell = 'buy'
+    elif close_price == 3.3:
+        decision_to_buy_or_sell = 'sell'
+    else:
+        decision_to_buy_or_sell = 'hold'
     return decision_to_buy_or_sell
 
 # Example usage
 if __name__ == "__main__":
-    wallet = >><<
+    wallet = {
+  "address": "0x352425ab2c9cec336f16d6856d29cc0ce003b9f157285da951a86a8c6ce490dc",
+  "privateKey": {
+    "keypair": {
+      "publicKey": {
+        "0": 101,
+        "1": 196,
+        "2": 78,
+        "3": 23,
+        "4": 122,
+        "5": 138,
+        "6": 187,
+        "7": 25,
+        "8": 117,
+        "9": 211,
+        "10": 67,
+        "11": 11,
+        "12": 255,
+        "13": 239,
+        "14": 15,
+        "15": 167,
+        "16": 101,
+        "17": 231,
+        "18": 135,
+        "19": 8,
+        "20": 52,
+        "21": 145,
+        "22": 107,
+        "23": 169,
+        "24": 149,
+        "25": 106,
+        "26": 110,
+        "27": 197,
+        "28": 11,
+        "29": 216,
+        "30": 199,
+        "31": 43
+      },
+      "secretKey": {
+        "0": 208,
+        "1": 0,
+        "2": 66,
+        "3": 168,
+        "4": 84,
+        "5": 164,
+        "6": 10,
+        "7": 231,
+        "8": 77,
+        "9": 249,
+        "10": 140,
+        "11": 113,
+        "12": 99,
+        "13": 195,
+        "14": 12,
+        "15": 85,
+        "16": 78,
+        "17": 31,
+        "18": 51,
+        "19": 116,
+        "20": 156,
+        "21": 248,
+        "22": 64,
+        "23": 101,
+        "24": 158,
+        "25": 111,
+        "26": 127,
+        "27": 101,
+        "28": 70,
+        "29": 101,
+        "30": 127,
+        "31": 49,
+        "32": 101,
+        "33": 196,
+        "34": 78,
+        "35": 23,
+        "36": 122,
+        "37": 138,
+        "38": 187,
+        "39": 25,
+        "40": 117,
+        "41": 211,
+        "42": 67,
+        "43": 11,
+        "44": 255,
+        "45": 239,
+        "46": 15,
+        "47": 167,
+        "48": 101,
+        "49": 231,
+        "50": 135,
+        "51": 8,
+        "52": 52,
+        "53": 145,
+        "54": 107,
+        "55": 169,
+        "56": 149,
+        "57": 106,
+        "58": 110,
+        "59": 197,
+        "60": 11,
+        "61": 216,
+        "62": 199,
+        "63": 43
+      }
+    }
+  },
+  "secretKey": "suiprivkey1qrgqqs4g2jjq4e6dlxx8zc7rp325u8enwjw0ssr9nehh7e2xv4lnzzansjy"
+}
     wallet = ensure_json(wallet)
     try:
         curr_status = "liq"
@@ -153,9 +260,9 @@ if __name__ == "__main__":
                     curr_status = "liq"  # Change status to liquidity
                     decision = "sell"
             
-            log_file_path = "./user_assets/{uid}/data_log.txt"
+            log_file_path = "./user_assets/ohdneYep5i/data_log.txt"
             with open(log_file_path, 'a') as f:
-                f.write(f"Decision: {decision} at {time.strftime('%Y-%m-%d %H:%M:%S')}\\n")
+                f.write(f"Decision: {decision} at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
                 print(f"Logged decision: {decision}")
             
             ### Main Tasks
@@ -167,79 +274,6 @@ if __name__ == "__main__":
             # print("---")
             
     except KeyboardInterrupt:
-        print("\\n🛑 Stopped by user")
+        print("\n🛑 Stopped by user")
     except Exception as e:
         print(f"💥 Fatal error: {e}")
-"""
-
-async def get_wallet(uid):
-    try:
-        user_folder = f"./user_assets/{uid}"
-        wallet_path = os.path.join(user_folder, "wallet_sync.json")
-        with open(wallet_path, 'r') as f:
-            wallet_data = json.load(f)
-        return wallet_data.get("wallet")
-    except Exception as e:
-        print(f"Error in getting wallet: {e}")
-        return None
-
-async def graph_to_code(uid, password=None):
-    try:
-        user_folder = f"./user_assets/{uid}"
-        code_sync_path = os.path.join(user_folder, "code_sync.json")
-
-        # Check if the user folder exists
-        if not os.path.exists(user_folder):
-            return {"status": "error", "message": "User folder does not exist", "code": 404}
-        
-        # Check if the code_sync.json file exists in the folder
-        if not os.path.isfile(code_sync_path):
-            return {"status": "error", "message": "code_sync.json file not found", "code": 404}
-        
-        # Read the code_sync.json file
-        with open(code_sync_path, 'r') as file:
-            code_sync_data = json.load(file)
-
-        # Check if the "deploy_status" field exists in the json and its value
-        if code_sync_data.get("deploy_status", False):
-            return {"status": "error", "message": "The no code graph is already deployed and no changes are noticed", "code": 400}
-
-        # Copy the content of data_config.json and preprocess using map_json
-        with open(user_folder + "/data_config.json", 'r') as file:
-            data_config = json.load(file)
-
-        mapped_json = map_json(data_config)
-
-        ### Here we will convert json to code, and then try to deploy it ###
-        req, imp, code = gen_code(mapped_json)
-        imp2 = imp.copy()
-        imp.append("\n\nprint(\"Hello World\")")
-
-        print(code)
-
-        wallet = await get_wallet(uid)
-        if not wallet:
-            return {"status": "error", "message": "Wallet not found", "code": 404}
-
-        req_path = os.path.join(user_folder, "requirements.txt")
-        imp_path = os.path.join(user_folder, "initialise.py")
-        code_path = os.path.join(user_folder, "trading_code.py")
-
-        with open(req_path, 'w') as file:
-            file.write("\n".join(req))
-
-        # Write each import on a new line
-        with open(imp_path, 'w') as file:
-            file.write("\n".join(imp))
-
-        indented_code = "\n".join("    " + line for line in code.splitlines())
-
-        # Replace placeholder and combine
-        final_code = "\n".join(imp2) + "\n\n" + placeholder_code.replace("{uid}", str(uid)).replace("<<>>", indented_code).replace(">><<", json.dumps(wallet, indent=2))
-
-        with open(code_path, 'w', encoding='utf-8') as file:
-            file.write(final_code)
-
-        return {"status": "success", "message": "Deployed successfully", "code": 200}
-    except Exception as e:
-        return {"status": "error", "message": str(e), "code": 500}

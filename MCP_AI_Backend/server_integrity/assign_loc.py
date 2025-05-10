@@ -77,6 +77,9 @@ async def create_user(password: str):
         "cloned_from_password": None,
     }
 
+    wallet_sync = {
+    }
+
     data_config = {}
 
     # Create the necessary files (without writing any content except init_config.json)
@@ -100,6 +103,9 @@ async def create_user(password: str):
 
     with open(user_folder / "code_sync.json", 'w') as f:
         json.dump(code_sync, f, indent=4) 
+
+    with open(user_folder / "wallet_sync.json", 'w') as f:
+        json.dump(wallet_sync, f, indent=4)
 
     # Close the DB connection
     conn.close()
