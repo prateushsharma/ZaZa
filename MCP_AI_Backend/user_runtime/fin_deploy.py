@@ -54,6 +54,9 @@ async def deploy_code(uid: str, password: str) -> dict:
             data["deploy_status"] = True
             with open(sync_path, "w") as json_file:
                 json.dump(data, json_file, indent=4)
+            clear_log_path = Path(f"./user_assets/{uid}/data_log.txt")
+            with open(clear_log_path, "w") as f:
+                f.close()
         except Exception as file_error:
             return {"status": "error", "message": f"Failed to update code_sync.json: {str(file_error)}"}
 

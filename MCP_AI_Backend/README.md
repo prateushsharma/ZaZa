@@ -1,105 +1,75 @@
-# DeFAI Agent Deployer :zap:
+# De\Zer0\FAI 🚀
 
-**Transform No-Code Graphs into Algorithmic Trading Agents on SUI Blockchain**
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)]()
+[![Docker Ready](https://img.shields.io/badge/docker-%230db7ed.svg?logo=docker&logoColor=white)]()
 
----
-
-## :rocket: Core Principle
-A revolutionary backend system enabling **zero-code deployment** of AI-powered trading algorithms through visual graph interfaces. Seamlessly converts decision trees into executable code for SUI/USDC trading pairs with enterprise-grade blockchain integration.
-
----
-
-## :wrench: Pre-requisites
-- [![Python 3.11.1](https://skillicons.dev/icons?i=py)](https://www.python.org/downloads/)  
-- [![Docker Desktop](https://skillicons.dev/icons?i=docker)](https://www.docker.com/products/docker-desktop/)  
+**Transform graph-based trading logic into executable code with zero programming, enabling real-time SUI/USDC trades through fail-safe automation.**  
 
 ---
 
-## :brain: Core Functionalities
-| Feature | Innovation |
-|---------|------------|
-| :key: Wallet-Password Fusion | Unified authentication using wallet addresses as cryptographic passwords |
-| :cyclone: UID Generation Engine | 10-digit base62 unique identifiers with anti-collision protocol |
-| :chart_with_upwards_trend: AI-Backed Trading | Real-time market analysis through Groq/Claude/Gemini integration |
-| :infinity: Persistent Execution | Agent continuity through containerized process isolation |
-| :globe_with_meridians: Global Leaderboard | Sharpe ratio, drawdown, and profit factor metrics across all deployments |
+## Table of Contents
+- [Core Principle](#core-principle-)
+- [Features](#features-)
+- [Installation](#installation-)
+- [API Endpoints](#api-endpoints-)
+- [Architecture](#architecture-)
+- [Repository Structure](#repository-structure-)
+- [Privacy, Security & Reliability](#privacy-security--reliability)
+- [License](#license-)
+- [Contact](#contact-)
 
 ---
 
-## :building_construction: Model Architectures
+## Core Principle 💡
+Traditional trading automation requires expertise in both programming and financial markets, creating barriers for non-technical users. De\Zer0\FAI eliminates this complexity with:  
 
-### 1. **Model Context Protocol (MCP)**  
-   - Decision-making framework for trade execution logic  
-   - Handles 3-tier validation:  
-     ```mermaid
-     graph LR
-         A[Input Graph] --> B(Syntax Validation)
-         B --> C(Financial Logic Check)
-         C --> D(Risk Assessment)
-     ```
+1. **Graph-Based No-Code Studio**  
+   - Design strategies visually using nodes/edges with natural language processing (NLP)  
+   - Auto-convert graphs to executable code with the **LynqAI Context Protocol** for parallel tool/agent orchestration  
+   - Share/version graphs securely via password-protected UIDs  
 
-### 2. **Publisher-Subscriber Model**  
-   - Real-time market data distribution via Redis Pub/Sub  
-   - 12ms latency for SUI/USDC price feeds  
-   - Priority channels for:  
-     - Order execution (HIGH)  
-     - Backtesting data (MED)  
-     - Analytics (LOW)  
+2. **Enterprise-Grade Execution**  
+   - Concurrent graph deployments with real-time data logging  
+   - Risk evaluation filters and instant wallet generation  
+   - Periodic data publishers → preprocessing → strategy execution → risk-filtered trade decisions  
 
-### 3. **Hybrid Data Engine**  
-   | Component | Role | Performance |
-   |-----------|------|-------------|
-   | Redis | Real-time trade signals | 1.2M ops/sec |
-   | SQL Server | Historical analytics | 50k queries/sec |
-   | PID Controller | Resource allocation | 0.01% variance |
-
-### 4. **Concurrent Execution Core**  
-   - Asyncio-driven task management  
-   - Parallel processing for:  
-     - Graph compilation  
-     - Backtesting  
-     - Live execution  
-   - Thread-safe resource sharing  
-
-### 5. **Persistent Execution Matrix™**  
-   - *"Set it and forget it"* architecture  
-   - Features:  
-     - Containerized process isolation  
-     - Heartbeat monitoring (5s intervals)  
-     - Auto-recovery from:  
-       - Network drops  
-       - Temporary exchange outages  
-       - Volatility spikes  
+3. **Zero-DevOps Experience**  
+   - Automatic Redis-server containerization for cross-OS compatibility  
+   - Error-retry pipelines and atomic transaction safety  
 
 ---
 
-## :triangular_ruler: Model Architecture Graph
-```mermaid
-graph TD
-    A[No-Code Graph] --> B(MCP Protocol)
-    B --> C{Decision Engine}
-    C -->|Approved| D[Redis-SQL Matrix]
-    C -->|Rejected| E[Feedback Loop]
-    D --> F[Code Generation]
-    F --> G[Dockerized Execution]
-    G --> H[Global Leaderboard]
+## Features ✨
+- **🧩 Drag-and-Drop Strategy Builder**: Node-based interface with NLP-powered logic containers  
+- **⚡ LynqAI Protocol**: Parallel agent/tool execution for maximum throughput  
+- **🛡️ Risk-Aware Trading**: User-defined risk filters for auto-aborting unsafe trades  
+- **🔗 Shared Strategy Graphs**: Collaborate via encrypted UID/password links  
+- **📊 Real-Time Dashboard**: Track performance, logs, and wallet balances  
+- **🤖 Auto-Infrastructure**: Redis/Docker containers spun up on demand  
+
+*(Include architecture diagram here if available)*  
+
+---
+
+## Installation ⚙️  
+### Pre-requisites
+- [![Python 3.11.1](https://skillicons.dev/icons?i=py)](https://www.python.org/downloads/)  Python 🐍
+- [![Docker Desktop](https://skillicons.dev/icons?i=docker)](https://www.docker.com/products/docker-desktop/) Docker Desktop 🐳
+
+### Installation & Running
+
+```bash
+git clone https://github.com/PrateushSharma/ZaZa.git
+cd ZaZa
+cd MCP_AI_Backend
+python -m venv venv
+venv\Scripts\Activate
+pip install -r requirements.txt
+python main.py
 ```
 
----
-
-## :sparkles: Cutting-Edge Features
-- :shield: **Military-Grade Security**  
-  Argon2 password hashing + AES-256 wallet encryption
-- :robot: **AI Model Marketplace**  
-  Premium API integration for Claude/ChatGPT/Deepseek
-- :dna: **Efficient Code Cloning**  
-  Reference-based replication system (73% storage reduction)
-- :satellite: **Real-Time Analytics**  
-  Profit/loss tracking with millisecond latency
-
----
-
-## :computer: API Endpoints
+## API Endpoints 🌐
 
 ### <span style="color:#4CAF50">POST</span> `/get_uid`
 **Authentication Seed Generator**  
@@ -139,7 +109,13 @@ graph TD
 **Real-Time Deployment Stream**  
 ```json
 # Request
-{"uid": "AbC12XyZ89", "password": "0x1a2b...c3d4"}
+{
+  "uid": "AbC12XyZ89",
+  "password": "0x1a2b...c3d4",
+  "profit": 0.1, // Expressed in %, -1 indicated no limit
+  "loss": 0.2, // Expressed in %, -1 indicated no limit
+  "risk": "low/med/high"
+}
 ```
 ```text
 # Streaming Response
@@ -154,7 +130,10 @@ graph TD
 **Process Termination**  
 ```json
 // Request
-{"uid": "AbC12XyZ89", "password": "0x1a2b...c3d4"}
+{
+  "uid": "AbC12XyZ89",
+  "password": "0x1a2b...c3d4"
+}
 
 // Response
 {
@@ -167,7 +146,9 @@ graph TD
 **Portfolio Snapshot**  
 ```json
 // Request
-{"password": "0x1a2b...c3d4"}
+{
+  "password": "0x1a2b...c3d4"
+}
 
 // Response
 {
@@ -202,7 +183,10 @@ graph TD
 **Graph Decommission**  
 ```json
 // Request
-{"uid": "AbC12XyZ89", "password": "0x1a2b...c3d4"}
+{
+  "uid": "AbC12XyZ89", 
+  "password": "0x1a2b...c3d4"
+}
 
 // Response
 {
@@ -211,54 +195,122 @@ graph TD
 }
 ```
 
----
+### <span style="color:#4CAF50">POST</span> `/fetch_logs`
+**Graph Decommission**  
+```json
+// Request
+{
+  "uid": "AbC12XyZ89", 
+  "password": "0x1a2b...c3d4"
+}
 
-Key Features:
-- :lock: Wallet-based authentication for all endpoints
-- :arrows_counterclockwise: Atomic operations with rollback protection
-- :hourglass_flowing_sand: Real-time streaming for deployment progress
-- :card_file_box: Consistent response schema (status/message pattern)
-- :twisted_rightwards_arrows: Bidirectional cloning between users
-
----
-
-## :file_folder: Repository Structure
+// Response
+{
+  "status": "success",
+  "log": "log_data"
+}
 ```
-.
-├── admin_controls/           # Automated security protocols
-├── codegen_engine/           # Graph→Code transformer
-├── core_db/                  # SQL operations center
-├── data_integrity/           # Token validation hub
-├── knowledgebase_db/         # Trading strategy vault
-├── redis_docker_engine/      # Containerized Redis setup
-├── server_integrity/         # Endpoint security layer
-├── uid_management/           # Cryptographic UID system
-├── user_assets/              # Distributed execution environment
-├── utils/                    # Data transformation toolkit
-│
-├── .env.example              # Environment template
-├── main.py                   # FastAPI entrypoint
-└── requirements.txt          # Dependency manifest
-```
+---
+
+## Architecture 🏗️
+
+### 1. **LynqAI Protocol**  
+- Custom context protocol with Groq LPU compatibility  
+- Three-way collaboration:  
+  - Agent ↔ Agent conversations  
+  - Agent ↔ Tool interactions  
+  - Context transfer between components  
+- Simple registration for tools/agents
+
+### 2. **Publisher-Subscriber Model**  
+- Real-time data via Redis Pub/Sub  
+- Priority channels:  
+  - 🔴 HIGH: Order execution (ultra-low latency)  
+  - 🟡 MED: Backtesting data  
+  - 🟢 LOW: Analytics  
+
+### 3. **Hybrid Data Engine**  
+- Combines:  
+  - Redis (caching)  
+  - SQL (structured data)  
+  - Python/Rust/JS/C# (processing)  
+
+### 4. **Concurrent Execution Core**  
+- Asyncio task management  
+- Parallel processing for:  
+  - Graph compilation  
+  - Backtesting  
+  - Live trading  
+
+### 5. **Persistent Execution Matrix™**  
+- Containerized isolation  
+- Auto-recovery from:  
+  - Network failures  
+  - Exchange outages  
+  - Market volatility  
+- Heartbeat monitoring every 5s  
 
 ---
 
-## :arrow_forward: Installation
-```bash
-git clone https://github.com/your/repo.git && cd repo
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-python main.py
+## Repository Structure 📂
+
 ```
+ZaZa/  
+├── admin_controls/         # Fail-safe protocols & emergency shutdown  
+├── CMIT_deprecate/         # Deprecated Cross-Model Interaction Toolkit  
+├── codegen_engine/         # No-code graph → executable code conversion  
+├── core_db/                # Primary SQL database  
+├── data_integrity/         # API data validation/fetching pipelines  
+├── knowledgebase_db/       # Agent decision-making database  
+├── library/                # Tool autoloaders & decorators  
+├── lynqAI/                 # Custom MCP Toolkit for Groq 
+├── redis_docker_engine/    # Redis + Docker container management  
+├── redundant_5000_server/  # Test-mode port (5000) utilities  
+├── server_integrity/       # User terminal allocation system  
+├── uid_management/         # UID/wallet address generator  
+├── user_assets/            # User deployment metadata storage  
+├── user_runtime/           # Live graph PID/terminal manager  
+├── utils/                  # Graph preprocessing utilities  
+├── venv/                   # Python virtual environment  
+│  
+├── main.py                 🚀 FastAPI server (Port 8000)  
+├── requirements.txt        📦 Dependency list  
+├── .env                    🔒 Environment config  
+├── .env.example            🧪 Sample env template  
+└── README.md               📖 Documentation hub  
+```  
 
 ---
 
-## :guard: Admin Controls
-- Real-time data leak detection
-- Automated PID termination protocol
-- Dangling UID reclamation system
-- Blockchain-based audit trails
+## Privacy, Security & Reliability 🔒  
+
+- **🔐 Wallet Encryption**: AES-256 + environment-aware entropy (TRNG-seeded keys)  
+- **🤖 Model Integration**: LLama/Qwen/DeepSeek/Gemma/Allam/Mistral compatibility  
+- **🔄 Replication System**: Reference-based redundancy with eventual consistency  
+- **⚙️ Pipe & Filter Strategy**: Data Preprocessing → Strategy Evaluation → Risk Filters → Final Decision  
+- **🚨 Data Leak Detection**: Real-time payload monitoring & anomaly alerts  
+- **💀 PID Termination**: Auto-kill stalled/corrupted processes (5s timeout)  
+- **🗑️ UID Reclamation**: Purge dangling UIDs after 72h inactivity  
+- **⛓️ Audit Trails**: Immutable execution logs via private blockchain ledger  
+
+---
+
+## License 📄  
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for full terms.  
+
+---
+
+## Contact 📬  
+**Rudraksh Sachin Joshi**  
+*(LEAD AI DEVELOPER)*  
+[GitHub](https://github.com/RudrakshSJoshi)  
+
+**Prateush Sharma**  
+*(LEAD BLOCKCHAIN DEVELOPER)*  
+[GitHub](https://github.com/PrateushSharma)  
+
+**Project Repository**:  
+[https://github.com/PrateushSharma/ZaZa](https://github.com/PrateushSharma/ZaZa)  
 
 ---
 

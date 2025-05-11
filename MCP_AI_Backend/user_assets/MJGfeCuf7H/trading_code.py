@@ -1,4 +1,4 @@
-
+import random
 
 
 import os
@@ -7,6 +7,83 @@ import json
 import requests
 import time
 from pydantic import BaseModel
+import numpy as np
+from datetime import datetime
+from scipy.stats import linregress
+
+def compute_trend_slope(data, lookback=20):
+    candles = data.get("candlesticks", [])
+    if len(candles) < lookback:
+        return 0
+    prices = [candle["close"] for candle in candles[-lookback:]]
+    x = np.arange(len(prices))
+    slope, _, _, _, _ = linregress(x, prices)
+    return slope
+
+def average_volume(data, lookback=50):
+    candles = data.get("candlesticks", [])
+    if len(candles) < lookback:
+        return 0
+    return np.mean([c["volume"] for c in candles[-lookback:]])
+
+def current_volume(data):
+    candles = data.get("candlesticks", [])
+    if not candles:
+        return 0
+    return candles[-1]["volume"]
+
+def compute_rsi(data, lookback=14):
+    candles = data.get("candlesticks", [])
+    if len(candles) < lookback + 1:
+        return 0
+    closes = np.array([c["close"] for c in candles[-(lookback + 1):]])
+    diffs = np.diff(closes)
+    up = np.where(diffs > 0, diffs, 0).sum() / lookback
+    down = -np.where(diffs < 0, diffs, 0).sum() / lookback
+    rs = up / down if down != 0 else 100
+    return 100 - (100 / (1 + rs))
+
+def filter_decision(decision, data, risk="low"):
+    original_decision = decision
+    if risk == "high" or decision == "hold":
+        return decision
+
+    trend = compute_trend_slope(data)
+    vol = current_volume(data)
+    avg_vol = average_volume(data)
+    rsi = compute_rsi(data)
+
+    reason = ""
+    new_decision = decision
+
+    if decision == "buy":
+        if risk == "low":
+            if trend < 0.01 or vol < avg_vol:
+                new_decision = "hold"
+                reason = f"Trend slope ({trend:.4f}) insufficient or volume ({vol:.2f}) below average ({avg_vol:.2f})"
+        elif risk == "med":
+            if trend < 0:
+                new_decision = "hold"
+                reason = f"Negative trend slope detected ({trend:.4f})"
+    elif decision == "sell":
+        if risk == "low":
+            if trend > -0.01 or vol < avg_vol or rsi < 60:
+                new_decision = "hold"
+                reason = f"Trend slope ({trend:.4f}) insufficient, volume ({vol:.2f}) below average ({avg_vol:.2f}), or RSI ({rsi:.2f}) below threshold"
+        elif risk == "med":
+            if rsi < 50:
+                new_decision = "hold"
+                reason = f"RSI ({rsi:.2f}) below acceptable threshold (50)"
+
+    if new_decision != original_decision:
+        with open(f"./user_assets/MJGfeCuf7H/data_log.txt", "a", encoding="utf-8") as f:
+            f.write(f"[RISK FILTER] Risk profile '{risk.upper()}' intercepted decision '{original_decision.upper()}' → revised to 'HOLD'. Reason: {reason}.\n")
+    else:
+        with open(f"./user_assets/MJGfeCuf7H/data_log.txt", "a", encoding="utf-8") as f:
+            f.write(f"[RISK FILTER] Decision '{original_decision.upper()}' passed with risk profile '{risk.upper()}'. No action taken.\n")
+
+    return new_decision
+
 
 def ensure_json(wallet):
     # Check if wallet is a dictionary
@@ -54,7 +131,7 @@ def swap(wallet, from_coin, to_coin):
     )
     
     # Convert the Pydantic model to a dictionary to send in the request
-    swap_payload = swap_request.dict()  # This will serialize the model to a dictionary
+    swap_payload = swap_request.model_dump()   # This will serialize the model to a dictionary
 
     # Send the POST request to the /swap endpoint
     try:
@@ -107,13 +184,7 @@ def candle_generator(redis_host='localhost', redis_port=6379, channel='binance_d
         print("🔴 Redis connection closed")
 
 def agent_code(data):
-    last_close = data['candlesticks'][-1]['close']
-    if last_close == 3.25:
-        decision_to_buy_or_sell = 'buy'
-    elif last_close == 3.3:
-        decision_to_buy_or_sell = 'sell'
-    else:
-        decision_to_buy_or_sell = 'hold'
+    decision_to_buy_or_sell = random.choice(['buy', 'sell', 'hold'])
     return decision_to_buy_or_sell
 
 # Example usage
@@ -226,7 +297,9 @@ if __name__ == "__main__":
   },
   "secretKey": "suiprivkey1qrgqqs4g2jjq4e6dlxx8zc7rp325u8enwjw0ssr9nehh7e2xv4lnzzansjy"
 }
-    wallet = ensure_json(wallet)
+    wallet = Wallet(**wallet)
+    risk_status = "high"
+    log_file_path = "./user_assets/MJGfeCuf7H/data_log.txt"
     try:
         curr_status = "liq"
         for data in candle_generator():
@@ -234,7 +307,12 @@ if __name__ == "__main__":
                 continue
             
             decision = agent_code(data)
-            print(f"Decision: {decision}")
+            print(f"Agent Decision: {decision}")
+            with open(log_file_path, 'a', encoding='utf-8') as f:
+                f.write("="*100)
+                f.write(f"\n[AGENT EVALUATION] Agent Based Analysis Result: {decision.upper()}\n")
+            decision = filter_decision(decision, data, risk_status)
+            print(f"Filtered Decision: {decision}")
 
             if decision == "buy" and curr_status == "liq":
                 # Call swap from USDC to SUI (buy scenario)
@@ -246,10 +324,14 @@ if __name__ == "__main__":
             
             elif decision == "buy" and curr_status == "tkn":
                 # No action needed as already in tokens (tkn)
+                with open(log_file_path, 'a', encoding='utf-8') as f:
+                    f.write("[DECISION] Tokens already acquired, updating decision to 'hold'\n")
                 decision = "hold"
             
             elif decision == "sell" and curr_status == "liq":
                 # No action needed as already in liquidity (liq)
+                with open(log_file_path, 'a', encoding='utf-8') as f:
+                    f.write("[DECISION] Liquidity already acquired, updating decision to 'hold'\n")
                 decision = "hold"
             
             elif decision == "sell" and curr_status == "tkn":
@@ -259,11 +341,16 @@ if __name__ == "__main__":
                 if response: 
                     curr_status = "liq"  # Change status to liquidity
                     decision = "sell"
-            
-            log_file_path = "./user_assets/MJGfeCuf7H/data_log.txt"
-            with open(log_file_path, 'a') as f:
-                f.write(f"Decision: {decision} at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+
+            print(f"Final Decision: {decision}")
+
+            with open(log_file_path, 'a', encoding='utf-8') as f:
+                f.write(f"[FINAL DECISION] {decision.upper()} at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
                 print(f"Logged decision: {decision}")
+            
+            with open(log_file_path, 'a', encoding='utf-8') as f:
+                f.write("="*100)
+                f.write("\n\n")
             
             ### Main Tasks
             ## Call endpoint here to send swap request

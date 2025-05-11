@@ -21,7 +21,7 @@
             },
             "data": {
                 "name": "Basic Traing Agent",
-                "description": "This agent can only give u calls, but cannot perform transactions"
+                "description": "This is a testing agent, to check if the API calls work or not"
             }
         },
         {
@@ -32,7 +32,7 @@
                 "y": 93
             },
             "data": {
-                "strategyText": "Purchase when price of 1 sui is 3.25 and sell when it is 3.3$"
+                "strategyText": "Make any random decision anytime, buy, sell or hold, whatever. But make it random."
             }
         },
         {
