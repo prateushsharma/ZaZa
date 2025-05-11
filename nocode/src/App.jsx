@@ -9,24 +9,29 @@ import { ConnectButton } from '@mysten/dapp-kit';
 import './styles/App.css';
 
 function App() {
-  const [view, setView] = useState('landing'); // 'landing', 'flowBuilder', or 'dashboard'
+  const [view, setView] = useState('flowBuilder'); // 'flowBuilder' or 'dashboard'
+  const [showLanding, setShowLanding] = useState(true);
   
-  // Handler for entering the main app from landing page
+  // Function to enter the main app from landing page
   const handleEnterApp = () => {
-    setView('flowBuilder');
+    setShowLanding(false);
   };
   
-  // If on landing page, show only the landing page
-  if (view === 'landing') {
+  // If showing landing page, return that
+  if (showLanding) {
     return <LandingPage onEnterApp={handleEnterApp} />;
   }
   
-  // Otherwise show the main app (flowBuilder or dashboard)
   return (
     <div className="app">
       <div className="app-header">
-        <ConnectButton />
         <div className="app-title">DeFAI Agent Deployer ⚡</div>
+        
+        {/* Connect Wallet button in the top-right */}
+        <div className="wallet-connection">
+          <ConnectButton />
+        </div>
+        
         <div className="view-switcher">
           <button 
             className={`view-btn ${view === 'flowBuilder' ? 'active' : ''}`}

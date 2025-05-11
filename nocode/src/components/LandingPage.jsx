@@ -18,12 +18,10 @@ import {
 import '../styles/LandingPage.css';
 
 const LandingPage = ({ onEnterApp }) => {
-  const [isConnecting, setIsConnecting] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [touchRipples, setTouchRipples] = useState([]);
   const nextRippleId = useRef(0);
   
-  const backgroundRef = useRef(null);
   const gridRef = useRef(null);
   const containerRef = useRef(null);
   
@@ -131,6 +129,8 @@ const LandingPage = ({ onEnterApp }) => {
   
   // Handle touch/click for ripple effect
   const handleTouch = (e) => {
+    if (!containerRef.current) return;
+    
     // Get position relative to container
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -194,18 +194,6 @@ const LandingPage = ({ onEnterApp }) => {
         }
       }, duration * 1000);
     }
-  };
-  
-  // Connect wallet button click handler
-  const handleConnectClick = () => {
-    setIsConnecting(true);
-    
-    // Simulate connection process
-    setTimeout(() => {
-      setIsConnecting(false);
-      // Navigate to main app
-      if (onEnterApp) onEnterApp();
-    }, 1500);
   };
   
   // Calculate the parallax transform based on mouse position
@@ -536,146 +524,141 @@ const LandingPage = ({ onEnterApp }) => {
         </p>
         
         <div className="cta-buttons">
+          {/* Simple Let's Go button that takes user to the main app */}
           <button 
-            className="connect-wallet-btn button-hover"
-            onClick={handleConnectClick}
-            disabled={isConnecting}
+            className="lets-go-btn primary-btn"
+            onClick={onEnterApp}
           >
-            <BsWallet2 />
-            <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
-            {!isConnecting && <BsArrowRight className="arrow-icon" />}
-          </button>
-          
-          <button className="watch-demo-btn button-hover">
-            <BsFillPlayFill />
-            <span>Watch Demo</span>
+            <BsLightning />
+            <span>Let's Go</span>
+            <BsArrowRight className="arrow-icon" />
           </button>
         </div>
-        
-        {/* Center Video Animation */}
-        <div className="center-video-container glassmorphism">
-          <VideoAnimation />
+      </div>
+      
+      {/* Center Video Animation */}
+      <div className="center-video-container glassmorphism">
+        <VideoAnimation />
+      </div>
+      
+      <div className="feature-cards">
+        <div className="feature-card card-3d">
+          <div className="feature-icon blue">
+            <BsCodeSlash />
+          </div>
+          <h3>No-Code Builder</h3>
+          <p>Build complex AI workflows with an intuitive drag-and-drop interface</p>
         </div>
         
-        <div className="feature-cards">
-          <div className="feature-card card-3d">
-            <div className="feature-icon blue">
-              <BsCodeSlash />
-            </div>
-            <h3>No-Code Builder</h3>
-            <p>Build complex AI workflows with an intuitive drag-and-drop interface</p>
+        <div className="feature-card card-3d">
+          <div className="feature-icon purple">
+            <BsRobot />
           </div>
-          
-          <div className="feature-card card-3d">
-            <div className="feature-icon purple">
-              <BsRobot />
-            </div>
-            <h3>AI Agents</h3>
-            <p>Deploy autonomous agents powered by leading language models</p>
-          </div>
-          
-          <div className="feature-card card-3d">
-            <div className="feature-icon cyan">
-              <BsBraces />
-            </div>
-            <h3>Model Context Protocol</h3>
-            <p>Leverage the power of MCP for efficient, secure, and chainable AI model execution</p>
-          </div>
-          
-          <div className="feature-card card-3d">
-            <div className="feature-icon yellow">
-              <BsLightning />
-            </div>
-            <h3>SUI Blockchain</h3>
-            <p>Security and transparency with decentralized infrastructure</p>
-          </div>
-          
-          <div className="feature-card card-3d">
-            <div className="feature-icon green">
-              <BsArrowsFullscreen />
-            </div>
-            <h3>Scalable</h3>
-            <p>Scale from a single agent to a network of coordinated AI systems</p>
-          </div>
+          <h3>AI Agents</h3>
+          <p>Deploy autonomous agents powered by leading language models</p>
         </div>
         
-        {/* Workflow Preview */}
-        <div className="workflow-preview glassmorphism">
-          <div className="workflow-header">
-            <h3 className="neon-glow">Model Context Protocol (MCP) Workflow</h3>
-            <p>Deploy AI agents with integrated MCP for optimal performance</p>
+        <div className="feature-card card-3d">
+          <div className="feature-icon cyan">
+            <BsBraces />
+          </div>
+          <h3>Model Context Protocol</h3>
+          <p>Leverage the power of MCP for efficient, secure, and chainable AI model execution</p>
+        </div>
+        
+        <div className="feature-card card-3d">
+          <div className="feature-icon yellow">
+            <BsLightning />
+          </div>
+          <h3>SUI Blockchain</h3>
+          <p>Security and transparency with decentralized infrastructure</p>
+        </div>
+        
+        <div className="feature-card card-3d">
+          <div className="feature-icon green">
+            <BsArrowsFullscreen />
+          </div>
+          <h3>Scalable</h3>
+          <p>Scale from a single agent to a network of coordinated AI systems</p>
+        </div>
+      </div>
+      
+      {/* Workflow Preview */}
+      <div className="workflow-preview glassmorphism">
+        <div className="workflow-header">
+          <h3 className="neon-glow">Model Context Protocol (MCP) Workflow</h3>
+          <p>Deploy AI agents with integrated MCP for optimal performance</p>
+        </div>
+        
+        <div className="workflow-image">
+          <div className="workflow-node node-start neon-box">
+            <BsLightning className="node-icon" />
+            <span>Start</span>
           </div>
           
-          <div className="workflow-image">
-            <div className="workflow-node node-start neon-box">
-              <BsLightning className="node-icon" />
-              <span>Start</span>
+          <div className="workflow-edge edge-1"></div>
+          
+          <div className="workflow-node node-mcp neon-box">
+            <div className="mcp-badge">MCP</div>
+            <span>Context Protocol</span>
+          </div>
+          
+          <div className="workflow-edge edge-2"></div>
+          
+          <div className="workflow-node node-agent neon-box">
+            <BsRobot className="node-icon" />
+            <span>Agent</span>
+          </div>
+          
+          <div className="workflow-edges">
+            <div className="workflow-edge edge-3a"></div>
+            <div className="workflow-edge edge-3b"></div>
+            <div className="workflow-edge edge-3c"></div>
+          </div>
+          
+          <div className="workflow-child-nodes">
+            <div className="workflow-node node-model">
+              <BsCpu className="node-icon" />
+              <span>Model</span>
             </div>
             
-            <div className="workflow-edge edge-1"></div>
-            
-            <div className="workflow-node node-mcp neon-box">
-              <div className="mcp-badge">MCP</div>
-              <span>Context Protocol</span>
+            <div className="workflow-node node-memory">
+              <BsDatabase className="node-icon" />
+              <span>Memory</span>
             </div>
             
-            <div className="workflow-edge edge-2"></div>
-            
-            <div className="workflow-node node-agent neon-box">
-              <BsRobot className="node-icon" />
-              <span>Agent</span>
-            </div>
-            
-            <div className="workflow-edges">
-              <div className="workflow-edge edge-3a"></div>
-              <div className="workflow-edge edge-3b"></div>
-              <div className="workflow-edge edge-3c"></div>
-            </div>
-            
-            <div className="workflow-child-nodes">
-              <div className="workflow-node node-model">
-                <BsCpu className="node-icon" />
-                <span>Model</span>
-              </div>
-              
-              <div className="workflow-node node-memory">
-                <BsDatabase className="node-icon" />
-                <span>Memory</span>
-              </div>
-              
-              <div className="workflow-node node-tool">
-                <BsGear className="node-icon" />
-                <span>Tools</span>
-              </div>
+            <div className="workflow-node node-tool">
+              <BsGear className="node-icon" />
+              <span>Tools</span>
             </div>
           </div>
         </div>
+      </div>
+      
+      <div className="stats-section">
+        <div className="stat-item card-3d">
+          <div className="stat-value">12.5K+</div>
+          <div className="stat-label">Deployed Agents</div>
+        </div>
         
-        <div className="stats-section">
-          <div className="stat-item card-3d">
-            <div className="stat-value">12.5K+</div>
-            <div className="stat-label">Deployed Agents</div>
-          </div>
-          
-          <div className="stat-item card-3d">
-            <div className="stat-value">$2.4M</div>
-            <div className="stat-label">Trading Volume</div>
-          </div>
-          
-          <div className="stat-item card-3d">
-            <div className="stat-value">99.9%</div>
-            <div className="stat-label">Uptime</div>
-          </div>
-          
-          <div className="stat-item card-3d">
-            <div className="stat-value">500ms</div>
-            <div className="stat-label">MCP Response Time</div>
-          </div>
-          
-          <div className="stat-item card-3d">
-            <div className="stat-value">24/7</div>
-            <div className="stat-label">Execution</div>
-          </div>
+        <div className="stat-item card-3d">
+          <div className="stat-value">$2.4M</div>
+          <div className="stat-label">Trading Volume</div>
+        </div>
+        
+        <div className="stat-item card-3d">
+          <div className="stat-value">99.9%</div>
+          <div className="stat-label">Uptime</div>
+        </div>
+        
+        <div className="stat-item card-3d">
+          <div className="stat-value">500ms</div>
+          <div className="stat-label">MCP Response Time</div>
+        </div>
+        
+        <div className="stat-item card-3d">
+          <div className="stat-value">24/7</div>
+          <div className="stat-label">Execution</div>
         </div>
       </div>
       

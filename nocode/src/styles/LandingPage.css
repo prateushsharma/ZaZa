@@ -2178,3 +2178,218 @@ body, html {
       justify-content: center;
     }
   }
+  /* Add this to your LandingPage.css file */
+
+/* ConnectButton wrapper and styling */
+.connect-wallet-btn {
+  position: relative;
+  background: linear-gradient(45deg, #5e72e4, #11cdef);
+  color: white;
+  min-width: 200px;
+  height: 56px;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(94, 114, 228, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.connect-wallet-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: all 0.75s ease;
+  z-index: 1;
+}
+
+.connect-wallet-btn:hover::before {
+  left: 100%;
+}
+
+.connect-wallet-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(94, 114, 228, 0.5);
+}
+
+/* Target the Connect Button from dapp-kit */
+.connect-wallet-btn button {
+  background: transparent !important;
+  border: none !important;
+  color: white !important;
+  font-family: inherit !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 25px !important;
+  cursor: pointer !important;
+  z-index: 2;
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Ensure the wallet button text is visible */
+.connect-wallet-btn button span {
+  color: white !important;
+}
+/* Add these styles to your LandingPage.css file */
+
+/* Connect wallet wrapper */
+.connect-wallet-wrapper {
+  position: relative;
+  min-width: 200px;
+  height: 56px;
+  background: linear-gradient(45deg, #5e72e4, #11cdef);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(94, 114, 228, 0.4);
+  transition: all 0.3s ease;
+}
+
+.connect-wallet-wrapper:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(94, 114, 228, 0.5);
+}
+
+/* Style all buttons in the ConnectButton */
+.connect-wallet-wrapper button {
+  background: transparent !important;
+  border: none !important;
+  width: 100% !important;
+  height: 100% !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 0 25px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Shimmer effect */
+.connect-wallet-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: all 0.75s ease;
+}
+
+.connect-wallet-wrapper:hover::before {
+  left: 100%;
+}
+
+/* Alternative enter app button */
+.enter-app-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 25px;
+  height: 56px;
+  border-radius: 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.enter-app-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.enter-app-btn svg {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+/* Add this CSS for the Let's Go button */
+
+.lets-go-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 30px;
+  height: 56px;
+  min-width: 200px;
+  border-radius: 28px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(45deg, #5e72e4, #11cdef);
+  color: white;
+  border: none;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(94, 114, 228, 0.4);
+}
+
+.lets-go-btn svg {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.lets-go-btn .arrow-icon {
+  margin-left: 10px;
+  margin-right: 0;
+  transition: transform 0.3s ease;
+}
+
+.lets-go-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(94, 114, 228, 0.5);
+}
+
+.lets-go-btn:hover .arrow-icon {
+  transform: translateX(5px);
+}
+
+/* Shimmer effect */
+.lets-go-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  transition: all 0.75s ease;
+}
+
+.lets-go-btn:hover::before {
+  left: 100%;
+}
