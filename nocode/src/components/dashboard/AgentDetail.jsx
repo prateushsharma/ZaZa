@@ -13,7 +13,8 @@ import {
   BsArrowRepeat,
   BsShieldCheck,
   BsLightning,
-  BsCashCoin
+  BsCashCoin,
+  BsHash
 } from 'react-icons/bs';
 import '../../styles/AgentDetail.css';
 
@@ -79,6 +80,14 @@ const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeplo
             <div className="item-content">
               <div className="item-label">Uptime</div>
               <div className="item-value">{agent.status === 'running' ? '4h 23m' : 'N/A'}</div>
+            </div>
+          </div>
+          
+          <div className="overview-item">
+            <div className="item-icon"><BsHash /></div>
+            <div className="item-content">
+              <div className="item-label">Agent UID</div>
+              <div className="item-value">{agent.uid || 'Not authenticated'}</div>
             </div>
           </div>
           

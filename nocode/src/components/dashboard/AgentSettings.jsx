@@ -8,9 +8,11 @@ import {
   BsShieldLock,
   BsBriefcase,
   BsRobot,
-  BsWallet2
+  BsWallet2,
+  BsHash
 } from 'react-icons/bs';
 import '../../styles/AgentSettings.css';
+import UIDDisplay from '../UIDDisplay';
 
 const AgentSettings = ({ agent }) => {
   const [name, setName] = useState(agent?.name || '');
@@ -165,9 +167,12 @@ const AgentSettings = ({ agent }) => {
         
         <div className="settings-section">
           <div className="section-header">
-            <h4><BsShieldLock /> Security & Notifications</h4>
-            <p>Configure security and notification settings</p>
+            <h4><BsShieldLock /> Security & Authentication</h4>
+            <p>Authentication and security settings</p>
           </div>
+          
+          {/* UID Display Component */}
+          <UIDDisplay />
           
           <div className="form-group checkbox-group">
             <label>

@@ -29,6 +29,7 @@ import {
 } from 'react-icons/bs';
 import '../styles/Dashboard.css';
 import { useAgentStore } from '../store/agentStore';
+import { useAuth } from '../contexts/AuthContext';
 import AgentDetail from './dashboard/AgentDetail';
 import AgentLogs from './dashboard/AgentLogs';
 import AgentMetrics from './dashboard/AgentMetrics';
@@ -61,6 +62,8 @@ const Dashboard = ({ onSwitchToBuilder }) => {
     getAgentLogs,
     isLoading 
   } = useAgentStore();
+  
+  const { uid, walletAddress } = useAuth();
   
   useEffect(() => {
     // Fetch initial agents data
@@ -129,18 +132,19 @@ const Dashboard = ({ onSwitchToBuilder }) => {
     
     updateStep('wallet', 'in-progress');
     await new Promise(resolve => setTimeout(resolve, 2500));
-    const mockWalletAddress = '0x' + Array.from({length: 40}, () => 
+    const mockWalletAddress = agent.walletAddress || ('0x' + Array.from({length: 40}, () => 
       Math.floor(Math.random() * 16).toString(16)
-    ).join('');
+    ).join(''));
     updateStep('wallet', 'complete', `Agent wallet created: ${mockWalletAddress.substring(0, 8)}...${mockWalletAddress.substring(mockWalletAddress.length - 8)}`);
     
     updateStep('mcp', 'in-progress');
     await new Promise(resolve => setTimeout(resolve, 2000));
-    updateStep('mcp', 'complete', 'Model Context Protocol initialized and ready.');
+    // Include UID in MCP initialization logs
+    updateStep('mcp', 'complete', `Model Context Protocol initialized with UID: ${uid || 'No UID available'}`);
     
     updateStep('deployment', 'in-progress');
     await new Promise(resolve => setTimeout(resolve, 4000));
-    updateStep('deployment', 'complete', 'Agent deployed to SUI blockchain successfully.');
+    updateStep('deployment', 'complete', `Agent deployed to SUI blockchain successfully with wallet: ${walletAddress ? walletAddress.substring(0, 8) + '...' : 'Not connected'}`);
     
     updateStep('verification', 'in-progress');
     await new Promise(resolve => setTimeout(resolve, 1500));

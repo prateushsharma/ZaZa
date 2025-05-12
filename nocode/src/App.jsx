@@ -5,7 +5,8 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
 import { BsRobot, BsDiagram3 } from 'react-icons/bs';
-import { ConnectButton } from '@mysten/dapp-kit';
+import WalletConnector from './components/WalletConnector';
+import { AuthProvider } from './contexts/AuthContext';
 import './styles/App.css';
 
 function App() {
@@ -23,42 +24,44 @@ function App() {
   }
   
   return (
-    <div className="app">
-      <div className="app-header">
-        <div className="app-title">DeFAI Agent Deployer ⚡</div>
-        
-        {/* Connect Wallet button in the top-right */}
-        <div className="wallet-connection">
-          <ConnectButton />
+    <AuthProvider>
+      <div className="app">
+        <div className="app-header">
+          <div className="app-title">DeFAI Agent Deployer ⚡</div>
+          
+          {/* Custom wallet connection with UID display */}
+          <div className="wallet-connection">
+            <WalletConnector />
+          </div>
+          
+          <div className="view-switcher">
+            <button 
+              className={`view-btn ${view === 'flowBuilder' ? 'active' : ''}`}
+              onClick={() => setView('flowBuilder')}
+            >
+              <BsDiagram3 /> Flow Builder
+            </button>
+            <button 
+              className={`view-btn ${view === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setView('dashboard')}
+            >
+              <BsRobot /> Dashboard
+            </button>
+          </div>
         </div>
         
-        <div className="view-switcher">
-          <button 
-            className={`view-btn ${view === 'flowBuilder' ? 'active' : ''}`}
-            onClick={() => setView('flowBuilder')}
-          >
-            <BsDiagram3 /> Flow Builder
-          </button>
-          <button 
-            className={`view-btn ${view === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setView('dashboard')}
-          >
-            <BsRobot /> Dashboard
-          </button>
+        <div className="app-container">
+          {view === 'flowBuilder' ? (
+            <>
+              <Sidebar />
+              <FlowCanvas onDeploy={() => setView('dashboard')} />
+            </>
+          ) : (
+            <Dashboard onSwitchToBuilder={() => setView('flowBuilder')} />
+          )}
         </div>
       </div>
-      
-      <div className="app-container">
-        {view === 'flowBuilder' ? (
-          <>
-            <Sidebar />
-            <FlowCanvas onDeploy={() => setView('dashboard')} />
-          </>
-        ) : (
-          <Dashboard onSwitchToBuilder={() => setView('flowBuilder')} />
-        )}
-      </div>
-    </div>
+    </AuthProvider>
   );
 }
 
