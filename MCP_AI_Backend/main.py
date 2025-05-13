@@ -15,6 +15,7 @@ from server_integrity.fetch_loc import fetch_user_data
 from server_integrity.clone_loc import clone_code
 from server_integrity.delete_loc import delete_asset
 from server_integrity.fetch_log import get_datalogs
+from server_integrity.fetch_wallet_data import get_user_wallet_address
 from data_integrity.sui_fetch import start_binance_data_publisher
 from data_integrity.sui_catch import start_binance_data_subscriber
 from redis_docker_engine.setup_redis import setup_docker_redis_engine
@@ -73,6 +74,11 @@ async def update_code(request: UpdateRequest):
 class DeployRequest(BaseModel):
     uid: str
     password: str
+
+@app.post("/fetch_wallet")
+async def fetch_wallet(request: DeployRequest):
+    output = await get_user_wallet_address(request.uid)
+    return output
 
 class RiskLevel(str, Enum):
     low = "low"
