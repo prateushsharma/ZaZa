@@ -10,8 +10,8 @@ redis_port = 6379         # Redis server port
 redis_channel = 'binance_data'  # Redis pub/sub channel name
 r = redis.Redis(host=redis_host, port=redis_port)
 
-# Function to fetch candlestick data for SUIUSDT
-def fetch_candlesticks(symbol="SUIUSDT", interval="1m", limit=500):
+# Function to fetch candlestick data for SUIUSDC
+def fetch_candlesticks(symbol="SUIUSDC", interval="1m", limit=500):
     url = "https://api.binance.com/api/v3/klines"
     params = {
         "symbol": symbol,
@@ -46,7 +46,7 @@ def check_shutdown_event(shutdown_event):
     return False
 
 # Function to fetch and publish data every minute
-def start_binance_data_publisher(symbol="SUIUSDT", shutdown_event=None):
+def start_binance_data_publisher(symbol="SUIUSDC", shutdown_event=None):
     iteration = 0
     print(f"        [INIT] -> 🚀 Starting Publisher on Redis Server")
 
@@ -63,6 +63,16 @@ def start_binance_data_publisher(symbol="SUIUSDT", shutdown_event=None):
                 print("---")
                 print(f"[INFO] -> Iteration {iteration}: Retrieved {len(data)} candlestick entries for symbol '{symbol}'.")
 
+                # ✅ Print the most recent candle info
+                latest_candle = data[-1]  # Get the most recent one
+                print(f"[DATA] -> Latest Candle:")
+                print(f"         Time:   {latest_candle['timestamp']}")
+                print(f"         Open:   {latest_candle['open']}")
+                print(f"         High:   {latest_candle['high']}")
+                print(f"         Low:    {latest_candle['low']}")
+                print(f"         Close:  {latest_candle['close']}")
+                print(f"         Volume: {latest_candle['volume']}")
+                
                 data_object = {
                     "timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     "candlesticks": data

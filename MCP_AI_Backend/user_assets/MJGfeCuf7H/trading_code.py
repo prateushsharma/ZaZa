@@ -297,7 +297,7 @@ if __name__ == "__main__":
   },
   "secretKey": "suiprivkey1qrgqqs4g2jjq4e6dlxx8zc7rp325u8enwjw0ssr9nehh7e2xv4lnzzansjy"
 }
-    wallet = Wallet(**wallet)
+    # wallet = Wallet(**wallet)
     risk_status = "high"
     log_file_path = "./user_assets/MJGfeCuf7H/data_log.txt"
     try:

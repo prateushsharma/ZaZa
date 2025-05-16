@@ -196,7 +196,7 @@ def agent_code(data):
 # Example usage
 if __name__ == "__main__":
     wallet = >><<
-    wallet = Wallet(**wallet)
+    # wallet = Wallet(**wallet)
     risk_status = "<><>"
     log_file_path = "./user_assets/{uid}/data_log.txt"
     try:
@@ -328,7 +328,7 @@ async def graph_to_code(uid, password=None, risk="low"):
         indented_code = "\n".join("    " + line for line in code.splitlines())
 
         # Replace placeholder and combine
-        final_code = "\n".join(imp2) + "\n\n" + placeholder_code.replace("{uid}", str(uid)).replace("<<>>", indented_code).replace(">><<", json.dumps(wallet, indent=2)).replace("<><>", risk)
+        final_code = "\n".join(imp2) + "\n\n" + placeholder_code.replace("{uid}", str(uid)).replace("<<>>", indented_code).replace(">><<", json.dumps(wallet)).replace("<><>", risk)
 
         with open(code_path, 'w', encoding='utf-8') as file:
             file.write(final_code)
