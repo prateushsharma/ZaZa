@@ -587,3 +587,62 @@
     border-top-color: var(--accent-primary);
     animation: spin 1s ease-in-out infinite;
   }
+  /* src/styles/Dashboard.css
+   Add these styles to the existing file */
+
+.dashboard-single-agent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
+.no-agent-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  text-align: center;
+}
+
+.no-agent-found .big-icon {
+  font-size: 4rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.no-agent-found h3 {
+  margin: 0 0 10px;
+  font-size: 1.5rem;
+}
+
+.no-agent-found p {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+}
+
+/* Remove the sidebar styles since we don't need them anymore */
+.dashboard-agents-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 0;
+}
+
+/* Update status indicators to show agent name */
+.status-indicators .status-value {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

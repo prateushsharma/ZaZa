@@ -80,23 +80,79 @@ export const updateAgentConfiguration = async (uid, walletAddress, code) => {
 };
 
 /**
- * Phase 2: Deploys/activates the agent on the blockchain (To be implemented)
+ * Phase 2: Deploys/activates the agent on the blockchain
  * @param {string} uid - The generated UID
  * @param {string} walletAddress - The connected wallet address
- * @param {object} deploymentData - Additional deployment data
+ * @param {object} deploymentData - Deployment parameters (profit, loss, risk)
  * @returns {Promise<{status: string, message?: string}>}
  */
 export const activateAgent = async (uid, walletAddress, deploymentData) => {
-  // TODO: Implement Phase 2 deployment/activation
-  console.log('Phase 2: Agent activation not yet implemented');
-  console.log('This will call the actual deployment endpoint with:', {
-    uid,
-    walletAddress,
-    deploymentData
-  });
-  
-  return {
-    status: 'pending',
-    message: 'Phase 2 deployment will be implemented later'
-  };
+  try {
+    const requestBody = {
+      uid: uid,
+      password: walletAddress,
+      profit: deploymentData.profit,
+      loss: deploymentData.loss,
+      risk: deploymentData.risk
+    };
+    
+    console.log('=== PHASE 2: DEPLOY AGENT ===');
+    console.log('URL:', `${API_BASE_URL}/deploy`);
+    console.log('Method:', 'POST');
+    console.log('Headers:', {
+      'Content-Type': 'application/json',
+    });
+    console.log('Request Body:', JSON.stringify(requestBody, null, 2));
+    console.log('=========================');
+    
+    const response = await fetch(`${API_BASE_URL}/deploy`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    console.log('Response Status:', response.status);
+    console.log('Response OK:', response.ok);
+    
+    // The deploy endpoint returns streaming data, so we'll handle it differently
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error Response Body:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+    }
+    
+    // For streaming response, we'll just check if it started successfully
+    // In a real implementation, you might want to handle the stream
+    const responseText = await response.text();
+    console.log('=== DEPLOY RESPONSE ===');
+    console.log('Response:', responseText);
+    console.log('==========================');
+    
+    // If the response contains deployment messages, it's successful
+    if (responseText.includes('Initiating graph to code conversion')) {
+      return {
+        status: 'success',
+        message: 'Deployment started successfully'
+      };
+    }
+    
+    return {
+      status: 'error',
+      message: 'Deployment failed'
+    };
+    
+  } catch (error) {
+    console.error('=== DEPLOYMENT ERROR ===');
+    console.error('Error Type:', error.name);
+    console.error('Error Message:', error.message);
+    console.error('Error Stack:', error.stack);
+    console.error('=======================');
+    
+    return {
+      status: 'error',
+      message: error.message || 'Failed to deploy agent'
+    };
+  }
 };

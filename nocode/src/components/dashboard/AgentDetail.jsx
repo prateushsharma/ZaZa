@@ -14,13 +14,25 @@ import {
   BsShieldCheck,
   BsLightning,
   BsCashCoin,
-  BsHash
+  BsHash,
+  BsGraphUp,
+  BsExclamationTriangle
 } from 'react-icons/bs';
 import '../../styles/AgentDetail.css';
+import { activateAgent } from '../../services/agentDeploymentService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeploy }) => {
   const [isCreatingWallet, setIsCreatingWallet] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [isDeploying, setIsDeploying] = useState(false);
+  
+  // Deployment parameters
+  const [profitLimit, setProfitLimit] = useState('10'); // Default 10%
+  const [lossLimit, setLossLimit] = useState('5'); // Default 5%
+  const [riskLevel, setRiskLevel] = useState('med'); // Default medium
+  
+  const { uid, walletAddress } = useAuth();
   
   const handleCreateWallet = async () => {
     setIsCreatingWallet(true);
@@ -44,17 +56,114 @@ const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeplo
     }
   };
   
+  const handleDeploy = async () => {
+    setIsDeploying(true);
+    try {
+      const deploymentData = {
+        uid: uid,
+        password: walletAddress,
+        profit: parseFloat(profitLimit) / 100, // Convert percentage to decimal
+        loss: parseFloat(lossLimit) / 100,     // Convert percentage to decimal
+        risk: riskLevel
+      };
+      
+      // Call the deployment service
+      const result = await activateAgent(uid, walletAddress, deploymentData);
+      
+      if (result.status === 'success') {
+        // If deployment successful, trigger the onDeploy callback
+        await onDeploy(agent);
+      } else {
+        alert(`Deployment failed: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Deployment error:', error);
+      alert('Failed to deploy agent');
+    } finally {
+      setIsDeploying(false);
+    }
+  };
+  
   return (
     <div className="agent-detail">
       <div className="detail-section agent-overview">
         <div className="section-header">
-          <h3>Agent Overview</h3>
+          <h3>Deployment Configuration</h3>
           {agent.status === 'running' ? (
             <span className="status-badge running">
               <span className="status-dot"></span> Running
             </span>
           ) : (
             <span className="status-badge stopped">Stopped</span>
+          )}
+        </div>
+        
+        <div className="deployment-params">
+          <div className="param-group">
+            <label>
+              <BsGraphUp /> Profit Limit (%)
+              <span className="param-info">Set -1 for no limit</span>
+            </label>
+            <input
+              type="number"
+              value={profitLimit}
+              onChange={(e) => setProfitLimit(e.target.value)}
+              min="-1"
+              step="0.1"
+              placeholder="Enter profit limit"
+            />
+          </div>
+          
+          <div className="param-group">
+            <label>
+              <BsExclamationTriangle /> Loss Limit (%)
+              <span className="param-info">Set -1 for no limit</span>
+            </label>
+            <input
+              type="number"
+              value={lossLimit}
+              onChange={(e) => setLossLimit(e.target.value)}
+              min="-1"
+              step="0.1"
+              placeholder="Enter loss limit"
+            />
+          </div>
+          
+          <div className="param-group">
+            <label>
+              <BsShieldCheck /> Risk Level
+            </label>
+            <select
+              value={riskLevel}
+              onChange={(e) => setRiskLevel(e.target.value)}
+            >
+              <option value="low">Low Risk</option>
+              <option value="med">Medium Risk</option>
+              <option value="high">High Risk</option>
+            </select>
+          </div>
+          
+          <button 
+            className="deploy-agent-btn"
+            onClick={handleDeploy}
+            disabled={isDeploying || !uid || !walletAddress}
+          >
+            {isDeploying ? (
+              <>
+                <div className="spinner-small"></div>
+                Deploying...
+              </>
+            ) : (
+              <>
+                <BsLightning /> Deploy Agent
+              </>
+            )}
+          </button>
+          
+          {(!uid || !walletAddress) && (
+            <div className="warning-message">
+              <BsExclamationTriangle /> Connect wallet and authenticate to deploy
+            </div>
           )}
         </div>
         
@@ -87,7 +196,7 @@ const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeplo
             <div className="item-icon"><BsHash /></div>
             <div className="item-content">
               <div className="item-label">Agent UID</div>
-              <div className="item-value">{agent.uid || 'Not authenticated'}</div>
+              <div className="item-value">{uid || 'Not authenticated'}</div>
             </div>
           </div>
           
@@ -191,49 +300,6 @@ const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeplo
               <div className="component-details">SUI Trading API</div>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <div className="detail-section agent-actions">
-        <div className="section-header">
-          <h3>Actions</h3>
-        </div>
-        
-        <div className="action-buttons">
-          {agent.walletStatus === 'active' ? (
-            <>
-              <button 
-                className={`action-btn ${agent.status === 'running' ? 'stop-btn' : 'start-btn'}`}
-                onClick={handleToggleStatus}
-                disabled={isUpdatingStatus}
-              >
-                {isUpdatingStatus ? (
-                  'Updating...'
-                ) : agent.status === 'running' ? (
-                  <><BsStop /> Stop Agent</>
-                ) : (
-                  <><BsPlay /> Start Agent</>
-                )}
-              </button>
-              
-              {agent.status !== 'running' && (
-                <button 
-                  className="action-btn deploy-btn"
-                  onClick={() => onDeploy(agent)}
-                >
-                  <BsLightning /> Deploy & Run
-                </button>
-              )}
-            </>
-          ) : (
-            <button 
-              className="action-btn create-wallet-btn"
-              onClick={handleCreateWallet}
-              disabled={isCreatingWallet}
-            >
-              {isCreatingWallet ? 'Creating...' : <><BsWallet2 /> Create Wallet</>}
-            </button>
-          )}
         </div>
       </div>
     </div>
