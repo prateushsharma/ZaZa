@@ -17,6 +17,7 @@ import {
 } from 'react-icons/bs';
 import '../../styles/AgentLogs.css';
 import { useAuth } from '../../contexts/AuthContext';
+import { fetchAgentLogs } from '../../services/agentDeploymentService';
 
 // Improved Decision Chart Component
 const DecisionChart = ({ decisions }) => {
@@ -29,9 +30,12 @@ const DecisionChart = ({ decisions }) => {
     
     const ctx = canvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
-    canvas.width = rect.width * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    
+    // Set canvas size with proper device pixel ratio
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr, dpr);
     
     // Clear canvas
     ctx.clearRect(0, 0, rect.width, rect.height);
@@ -95,7 +99,7 @@ const DecisionChart = ({ decisions }) => {
     // Draw line graph
     ctx.beginPath();
     ctx.strokeStyle = '#5e72e4';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = Cc2;
     
     points.forEach((point, index) => {
       if (index === 0) {
@@ -170,6 +174,8 @@ const DecisionChart = ({ decisions }) => {
   
   const handleMouseMove = (e) => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
+    
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -272,7 +278,7 @@ const DecisionChart = ({ decisions }) => {
   );
 };
 
-const AgentLogs = ({ agent, getAgentLogs, savedMonitoringData }) => {
+const AgentLogs = ({ agent, savedMonitoringData }) => {
   const [logs, setLogs] = useState([]);
   const [decisions, setDecisions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -286,11 +292,19 @@ const AgentLogs = ({ agent, getAgentLogs, savedMonitoringData }) => {
   
   // Parse logs to extract decisions
   const parseLogs = (logData) => {
-    const lines = logData.split('\n');
+    // Ensure logData is a string
+    const logString = typeof logData === 'string' ? logData : 
+                     Array.isArray(logData) ? logData.join('\n') : '';
+    
+    if (!logString) return { logs: [], decisions: [] };
+    
+    const lines = logString.split('\n');
     const parsedLogs = [];
     const parsedDecisions = [];
     
     lines.forEach((line) => {
+      if (!line.trim()) return;
+      
       if (line.includes('[AGENT EVALUATION]')) {
         const result = line.match(/Agent Based Analysis Result: (\w+)/);
         if (result) {
@@ -336,26 +350,15 @@ const AgentLogs = ({ agent, getAgentLogs, savedMonitoringData }) => {
     
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/fetch_logs', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uid: uid,
-          password: walletAddress
-        }),
-      });
+      const result = await fetchAgentLogs(uid, walletAddress);
       
-      const result = await response.json();
-      
-      if (result.status === 'success' && result.log) {
-        const { logs: parsedLogs, decisions: parsedDecisions } = parseLogs(result.log);
+      if (result.status === 'success' && result.logs) {
+        const { logs: parsedLogs, decisions: parsedDecisions } = parseLogs(result.logs);
         setLogs(parsedLogs);
         setDecisions(parsedDecisions);
         setError(null);
       } else {
-        setError('Failed to fetch logs');
+        setError('Failed to fetch logs: ' + (result.message || 'Unknown error'));
       }
     } catch (err) {
       setError('Failed to load agent logs. Please try again.');
@@ -368,8 +371,8 @@ const AgentLogs = ({ agent, getAgentLogs, savedMonitoringData }) => {
   // Initialize with saved data if available
   useEffect(() => {
     if (savedMonitoringData) {
-      setLogs(savedMonitoringData.logs);
-      setDecisions(savedMonitoringData.decisions);
+      setLogs(savedMonitoringData.logs || []);
+      setDecisions(savedMonitoringData.decisions || []);
       setLoading(false);
     } else {
       fetchLogs();
@@ -414,7 +417,7 @@ const AgentLogs = ({ agent, getAgentLogs, savedMonitoringData }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `agent-${agent.id}-logs-${new Date().toISOString().slice(0,10)}.txt`;
+    a.download = `agent-${agent?.id || 'unknown'}-logs-${new Date().toISOString().slice(0,10)}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

@@ -1,94 +1,138 @@
 // src/components/dashboard/AgentDetail.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BsRobot, 
-  BsWallet2, 
   BsPlay, 
   BsStop, 
   BsCpu, 
   BsDatabase,
   BsTools,
   BsClock,
-  BsClipboard,
-  BsArrowRepeat,
-  BsShieldCheck,
   BsLightning,
   BsCashCoin,
-  BsHash,
-  BsGraphUp,
   BsExclamationTriangle
 } from 'react-icons/bs';
 import '../../styles/AgentDetail.css';
-import { activateAgent } from '../../services/agentDeploymentService';
+import { 
+  fetchTradingBalances, 
+  deployAgent, 
+  setInitialTrading, 
+  stopAgent 
+} from '../../services/agentDeploymentService';
 import { useAuth } from '../../contexts/AuthContext';
+import TradingModal from '../modals/TradingModal';
 
-const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeploy }) => {
-  const [isCreatingWallet, setIsCreatingWallet] = useState(false);
+const AgentDetail = ({ agent, onAgentStop, onAgentStart }) => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-  const [isDeploying, setIsDeploying] = useState(false);
-  
-  // Deployment parameters
-  const [profitLimit, setProfitLimit] = useState('10'); // Default 10%
-  const [lossLimit, setLossLimit] = useState('5'); // Default 5%
-  const [riskLevel, setRiskLevel] = useState('med'); // Default medium
+  const [balances, setBalances] = useState({ sui: 0, usdc: 0 }); // Changed from sol to sui
+  const [isLoading, setIsLoading] = useState(true);
+  const [showTradingModal, setShowTradingModal] = useState(false);
+  const [tradingParams, setTradingParams] = useState({
+    startingAmount: 100,
+    profit: 0.1,
+    loss: 0.05,
+    risk: 'medium'
+  });
+  const [error, setError] = useState(null);
   
   const { uid, walletAddress } = useAuth();
-  
-  const handleCreateWallet = async () => {
-    setIsCreatingWallet(true);
-    try {
-      await onCreateWallet(agent.id);
-    } finally {
-      setIsCreatingWallet(false);
+
+  // Fetch initial balances
+  useEffect(() => {
+    const fetchBalances = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const result = await fetchTradingBalances(walletAddress);
+        if (result.status === 'success') {
+          // Convert from sol to sui in the balances
+          setBalances({
+            sui: result.balances.sui || result.balances.sol || 0,
+            usdc: result.balances.usdc || 0
+          });
+        } else {
+          setError(result.message || 'Failed to fetch balances');
+        }
+      } catch (error) {
+        console.error('Error fetching balances:', error);
+        setError('Failed to connect to the trading service');
+        // Set default balances to prevent UI from breaking
+        setBalances({ sui: 0, usdc: 0 });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (walletAddress) {
+      fetchBalances();
+      // Set up polling interval
+      const interval = setInterval(fetchBalances, 10000); // Every 10 seconds
+      return () => clearInterval(interval);
     }
-  };
-  
+  }, [walletAddress]);
+
   const handleToggleStatus = async () => {
     setIsUpdatingStatus(true);
+    setError(null);
     try {
       if (agent.status === 'running') {
-        await onStopAgent(agent.id);
+        // Stop agent
+        const result = await stopAgent(uid, walletAddress);
+        if (result.status === 'success') {
+          if (onAgentStop) onAgentStop();
+        } else {
+          setError(result.message || 'Failed to stop agent');
+        }
       } else {
-        await onStartAgent(agent.id);
+        // Show trading modal to start agent
+        setShowTradingModal(true);
       }
+    } catch (error) {
+      console.error('Error updating agent status:', error);
+      setError('Failed to update agent status. Please try again.');
     } finally {
       setIsUpdatingStatus(false);
     }
   };
-  
-  const handleDeploy = async () => {
-    setIsDeploying(true);
+
+  const handleStartAgent = async (params) => {
+    setIsUpdatingStatus(true);
+    setError(null);
     try {
-      const deploymentData = {
-        uid: uid,
-        password: walletAddress,
-        profit: parseFloat(profitLimit) / 100, // Convert percentage to decimal
-        loss: parseFloat(lossLimit) / 100,     // Convert percentage to decimal
-        risk: riskLevel
-      };
+      // Step 1: Set initial trading amounts
+      const tradingResult = await setInitialTrading(params.startingAmount, walletAddress);
       
-      // Call the deployment service
-      const result = await activateAgent(uid, walletAddress, deploymentData);
-      
-      if (result.status === 'success') {
-        // If deployment successful, trigger the onDeploy callback
-        await onDeploy(agent);
-      } else {
-        alert(`Deployment failed: ${result.message}`);
+      if (tradingResult.status !== 'success') {
+        throw new Error(tradingResult.message || 'Failed to set initial trading amounts');
       }
+
+      // Step 2: Deploy agent with trading parameters
+      const deployResult = await deployAgent(uid, walletAddress, {
+        profit: params.profit,
+        loss: params.loss,
+        risk: params.risk
+      });
+
+      if (deployResult.status !== 'success') {
+        throw new Error(deployResult.message || 'Failed to deploy agent');
+      }
+
+      // Update UI
+      if (onAgentStart) onAgentStart();
     } catch (error) {
-      console.error('Deployment error:', error);
-      alert('Failed to deploy agent');
+      console.error('Error starting agent:', error);
+      setError(error.message || 'Failed to start agent. Please try again.');
     } finally {
-      setIsDeploying(false);
+      setIsUpdatingStatus(false);
+      setShowTradingModal(false);
     }
   };
-  
+
   return (
     <div className="agent-detail">
       <div className="detail-section agent-overview">
         <div className="section-header">
-          <h3>Deployment Configuration</h3>
+          <h3>Agent Overview</h3>
           {agent.status === 'running' ? (
             <span className="status-badge running">
               <span className="status-dot"></span> Running
@@ -98,81 +142,12 @@ const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeplo
           )}
         </div>
         
-        <div className="deployment-params">
-          <div className="param-group">
-            <label>
-              <BsGraphUp /> Profit Limit (%)
-              <span className="param-info">Set -1 for no limit</span>
-            </label>
-            <input
-              type="number"
-              value={profitLimit}
-              onChange={(e) => setProfitLimit(e.target.value)}
-              min="-1"
-              step="0.1"
-              placeholder="Enter profit limit"
-            />
-          </div>
-          
-          <div className="param-group">
-            <label>
-              <BsExclamationTriangle /> Loss Limit (%)
-              <span className="param-info">Set -1 for no limit</span>
-            </label>
-            <input
-              type="number"
-              value={lossLimit}
-              onChange={(e) => setLossLimit(e.target.value)}
-              min="-1"
-              step="0.1"
-              placeholder="Enter loss limit"
-            />
-          </div>
-          
-          <div className="param-group">
-            <label>
-              <BsShieldCheck /> Risk Level
-            </label>
-            <select
-              value={riskLevel}
-              onChange={(e) => setRiskLevel(e.target.value)}
-            >
-              <option value="low">Low Risk</option>
-              <option value="med">Medium Risk</option>
-              <option value="high">High Risk</option>
-            </select>
-          </div>
-          
-          <button 
-            className="deploy-agent-btn"
-            onClick={handleDeploy}
-            disabled={isDeploying || !uid || !walletAddress}
-          >
-            {isDeploying ? (
-              <>
-                <div className="spinner-small"></div>
-                Deploying...
-              </>
-            ) : (
-              <>
-                <BsLightning /> Deploy Agent
-              </>
-            )}
-          </button>
-          
-          {(!uid || !walletAddress) && (
-            <div className="warning-message">
-              <BsExclamationTriangle /> Connect wallet and authenticate to deploy
-            </div>
-          )}
-        </div>
-        
         <div className="overview-grid">
           <div className="overview-item">
             <div className="item-icon"><BsClock /></div>
             <div className="item-content">
               <div className="item-label">Created</div>
-              <div className="item-value">{new Date(agent.created).toLocaleDateString()}</div>
+              <div className="item-value">{new Date().toLocaleDateString()}</div>
             </div>
           </div>
           
@@ -180,7 +155,7 @@ const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeplo
             <div className="item-icon"><BsClock /></div>
             <div className="item-content">
               <div className="item-label">Last Active</div>
-              <div className="item-value">{new Date(agent.lastActive).toLocaleDateString()} {new Date(agent.lastActive).toLocaleTimeString()}</div>
+              <div className="item-value">{agent.status === 'running' ? 'Now' : 'N/A'}</div>
             </div>
           </div>
           
@@ -193,80 +168,25 @@ const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeplo
           </div>
           
           <div className="overview-item">
-            <div className="item-icon"><BsHash /></div>
+            <div className="item-icon"><BsCashCoin /></div>
             <div className="item-content">
-              <div className="item-label">Agent UID</div>
-              <div className="item-value">{uid || 'Not authenticated'}</div>
+              <div className="item-label">SUI Balance</div>
+              <div className="item-value">{balances.sui} SUI</div>
             </div>
           </div>
           
           <div className="overview-item">
-            <div className="item-icon"><BsShieldCheck /></div>
+            <div className="item-icon"><BsCashCoin /></div>
             <div className="item-content">
-              <div className="item-label">Status</div>
-              <div className="item-value">{agent.status === 'running' ? 'Healthy' : 'Inactive'}</div>
+              <div className="item-label">USDC Balance</div>
+              <div className="item-value">{balances.usdc} USDC</div>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <div className="detail-section wallet-info">
-        <div className="section-header">
-          <h3>Wallet Information</h3>
-          {agent.walletStatus === 'active' ? (
-            <span className="status-badge active">Active</span>
-          ) : (
-            <span className="status-badge pending">Pending</span>
-          )}
         </div>
         
-        {agent.walletStatus === 'active' ? (
-          <div className="wallet-content">
-            <div className="wallet-detail">
-              <div className="wallet-detail-label">Wallet Address:</div>
-              <div className="wallet-address">
-                <span className="address-text">
-                  {`${agent.walletAddress.substring(0, 12)}...${agent.walletAddress.substring(agent.walletAddress.length - 12)}`}
-                </span>
-                <button 
-                  className="copy-btn"
-                  onClick={() => navigator.clipboard.writeText(agent.walletAddress)}
-                  title="Copy address"
-                >
-                  <BsClipboard />
-                </button>
-              </div>
-            </div>
-            
-            <div className="wallet-metrics">
-              <div className="wallet-metric">
-                <div className="metric-icon"><BsCashCoin /></div>
-                <div className="metric-content">
-                  <div className="metric-label">Balance</div>
-                  <div className="metric-value">{agent.balance} SUI</div>
-                </div>
-              </div>
-              
-              <div className="wallet-metric">
-                <div className="metric-icon"><BsArrowRepeat /></div>
-                <div className="metric-content">
-                  <div className="metric-label">Transactions</div>
-                  <div className="metric-value">24</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="wallet-placeholder">
-            <BsWallet2 className="wallet-icon" />
-            <p>No wallet has been created for this agent yet.</p>
-            <button 
-              className="create-wallet-btn"
-              onClick={handleCreateWallet}
-              disabled={isCreatingWallet}
-            >
-              {isCreatingWallet ? 'Creating...' : 'Create Wallet'}
-            </button>
+        {error && (
+          <div className="error-message">
+            <BsExclamationTriangle /> {error}
           </div>
         )}
       </div>
@@ -302,6 +222,44 @@ const AgentDetail = ({ agent, onStartAgent, onStopAgent, onCreateWallet, onDeplo
           </div>
         </div>
       </div>
+      
+      <div className="detail-section agent-actions">
+        <div className="section-header">
+          <h3>Actions</h3>
+        </div>
+        
+        <div className="action-buttons">
+          <button 
+            className={`action-btn ${agent.status === 'running' ? 'stop-btn' : 'start-btn'}`}
+            onClick={handleToggleStatus}
+            disabled={isUpdatingStatus || isLoading || !walletAddress}
+          >
+            {isUpdatingStatus ? (
+              'Updating...'
+            ) : agent.status === 'running' ? (
+              <><BsStop /> Stop Agent</>
+            ) : (
+              <><BsPlay /> Start Agent</>
+            )}
+          </button>
+        </div>
+        
+        {!walletAddress && (
+          <div className="warning-message">
+            <BsExclamationTriangle /> Wallet connection required to control agent
+          </div>
+        )}
+      </div>
+
+      {/* Trading Parameters Modal */}
+      {showTradingModal && (
+        <TradingModal
+          isOpen={showTradingModal}
+          onClose={() => setShowTradingModal(false)}
+          onSubmit={handleStartAgent}
+          initialParams={tradingParams}
+        />
+      )}
     </div>
   );
 };
