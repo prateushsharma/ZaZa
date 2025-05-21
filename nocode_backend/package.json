@@ -15,6 +15,7 @@
     "@mysten/deepbook-v3": "^0.14.7",
     "@mysten/sui": "^1.30.0",
     "@mysten/sui.js": "^0.54.1",
+    "axios": "^1.9.0",
     "bech32": "^2.0.0",
     "bn.js": "^5.2.2",
     "body-parser": "^2.2.0",
