@@ -3,12 +3,12 @@ import BN from 'bn.js'
 import { adjustForSlippage, d, initCetusSDK, Percentage, TransactionUtil } from '@cetusprotocol/cetus-sui-clmm-sdk'
 
 async function main() {
-  const sdk = initCetusSDK({ network: 'testnet' })
+  const sdk = initCetusSDK({ network: 'mainnet' })
 
-  const a2b = false
-  const pool = await sdk.Pool.getPool('0xabe1b85be598622df89862058f8a9e34ff17e8ebba7648d722c2b44497962158')
-  const byAmountIn = false
-  const amount = new BN(80000000000000)
+  const a2b = true
+  const pool = await sdk.Pool.getPool('0x4255fce5235636d21b6a7adc947db0b8fcbf2f9d0316fed99fbd773526554da1')
+  const byAmountIn = true
+  const amount = new BN(1000000)
 
   const swapTicks = await sdk.Pool.fetchTicks({
     pool_id: pool.poolAddress,
@@ -18,6 +18,7 @@ async function main() {
 
   console.log("swapTicks length: ", swapTicks.length)
 
+  console.log("Entered amount :",amount);
   const res = sdk.Swap.calculateRates({
     decimalsA: 6,
     decimalsB: 6,

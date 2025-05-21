@@ -1,7 +1,8 @@
-const fs = require('fs');
-const { initCetusSDK } = require('@cetusprotocol/cetus-sui-clmm-sdk'); // Ensure installed: npm install cetus-clmm-sdk
 
-const TestnetSDK = initCetusSDK({ network: 'testnet' });
+import fs from "fs";
+import { initCetusSDK } from '@cetusprotocol/cetus-sui-clmm-sdk'; // Ensure installed: npm install cetus-clmm-sdk
+
+const TestnetSDK = initCetusSDK({ network: 'mainnet' });
 
 async function getAllPool() {
     try {
@@ -11,7 +12,7 @@ async function getAllPool() {
         const poolText = JSON.stringify(pools, null, 2); // Pretty-print JSON
 
         // Write it to a file
-        fs.writeFileSync('all_pools.txt', poolText);
+        fs.writeFileSync('all_mainnet_pools.txt', poolText);
 
         console.log(`✅ Saved ${pools.length} pools to all_pools.txt`);
     } catch (error) {

@@ -1,0 +1,28 @@
+{
+    "poolAddress": "0x4255fce5235636d21b6a7adc947db0b8fcbf2f9d0316fed99fbd773526554da1",
+    "poolType": "0x1eabed72c53feb3805120a081dc15963c204dc8d091542592abaf7a35689b2fb::pool::Pool<0x44a63e7849d66d839a4f1f4d12281a4662e9cb98edb9b6a4200e944f5a536464::usdc::USDC, 0x2::sui::SUI>",
+    "coinTypeA": "0x44a63e7849d66d839a4f1f4d12281a4662e9cb98edb9b6a4200e944f5a536464::usdc::USDC",
+    "coinTypeB": "0x2::sui::SUI",
+    "coinAmountA": "34",
+    "coinAmountB": "30899976",
+    "current_sqrt_price": "17851127771136623784588",
+    "current_tick_index": 137505,
+    "fee_growth_global_a": "0",
+    "fee_growth_global_b": "139537701044567856129",
+    "fee_protocol_coin_a": "0",
+    "fee_protocol_coin_b": "59800",
+    "fee_rate": "10000",
+    "is_pause": false,
+    "liquidity": "31622",
+    "position_manager": {
+      "positions_handle": "0x8e6ea358c9455da2c01d7ef45e9be9ba9602e342dc378cd85b3d1a0569ea19c5",
+      "size": "1"
+    },
+    "rewarder_infos": [],
+    "rewarder_last_updated_time": "1747738696",
+    "tickSpacing": 200,
+    "ticks_handle": "0x320c153fec35cdaacb739adc1ab077f97c6d4c9705ff344d43b12c8c37bbdab1",
+    "uri": "https://bq7bkvdje7gvgmv66hrxdy7wx5h5ggtrrnmt66rdkkehb64rvz3q.arweave.net/DD4VVGknzVMyvvHjceP2v0_TGnGLWT96I1KIcPuRrnc",
+    "index": 30744,
+    "name": "USDC-SUI[200]"
+  }
