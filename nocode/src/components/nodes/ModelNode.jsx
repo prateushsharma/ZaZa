@@ -9,7 +9,8 @@ const ModelNode = ({ data, id }) => {
     { id: 'claude', name: 'Anthropic Claude' },
     { id: 'gpt4', name: 'OpenAI GPT-4' },
     { id: 'llama', name: 'Meta Llama 3' },
-    { id: 'gemini', name: 'Google Gemini' }
+    { id: 'gemini', name: 'Google Gemini' },
+    { id: 'Groq', name: 'Groq'}
   ];
   
   const [selectedModel, setSelectedModel] = useState(data.selectedModel || '');

@@ -514,7 +514,7 @@ const LandingPage = ({ onEnterApp }) => {
           <div className="logo-icon">
             <BsRobot />
           </div>
-          <h1>DeFAI</h1>
+          <h1>DeZeroFAI</h1>
         </div>
         
         <h2 className="tagline">Build and Deploy AI Agents on SUI Blockchain</h2>

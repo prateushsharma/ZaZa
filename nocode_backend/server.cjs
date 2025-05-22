@@ -26,7 +26,7 @@ let balances = {
 };
 
 // SUI/USDC price management
-let currentPrice = 0.95; // Initial price: 1 SUI = 0.95 USDC
+let currentPrice = 3.85; // Initial price: 1 SUI = 0.95 USDC
 let lastPriceUpdate = Date.now();
 let isUpdatingPrice = false;
 

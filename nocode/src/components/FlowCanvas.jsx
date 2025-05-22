@@ -10,7 +10,7 @@ import ReactFlow, {
   MarkerType
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { nodeTypes } from './nodes/NodeTypes';
+import { nodeTypes } from './nodes/nodeTypes';
 import { 
   BsPlay, 
   BsSave, 

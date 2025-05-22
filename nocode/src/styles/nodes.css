@@ -529,3 +529,77 @@
 .node-strategy .node-icon {
   color: #FFD700; /* Match the node color in the sidebar */
 }
+/* Add this to your existing Nodes.css file */
+
+.telegram-node {
+  background: linear-gradient(135deg, #0088cc, #229ed9);
+  border: 2px solid #0088cc;
+}
+
+.telegram-node .node-icon {
+  color: #ffffff;
+  font-size: 1.2em;
+}
+
+.telegram-node .node-title {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.telegram-node .node-content {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.telegram-node input,
+.telegram-node select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.telegram-node input[type="password"] {
+  font-family: monospace;
+}
+
+.telegram-node select {
+  background: white;
+  cursor: pointer;
+}
+/* Add this to your existing Nodes.css file */
+
+.telegram-node-circular {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0088cc, #229ed9);
+  border: 3px solid #0088cc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3);
+  transition: all 0.3s ease;
+}
+
+.telegram-node-circular:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 136, 204, 0.4);
+}
+
+.telegram-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.telegram-icon {
+  color: white;
+  font-size: 24px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}

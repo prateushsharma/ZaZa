@@ -1,6 +1,6 @@
 // src/components/nodes/NotificationNode.jsx
 import React, { useState } from 'react';
-import { Handle } from 'reactflow'; // Updated import
+import { Handle } from 'reactflow';
 import { BsBell } from 'react-icons/bs';
 import '../../styles/Nodes.css';
 
@@ -30,6 +30,12 @@ const NotificationNode = ({ data }) => {
           />
         </div>
       </div>
+      <Handle
+        type="source"
+        position="right"
+        id="notification-out"
+        style={{ background: 'var(--accent-primary)' }}
+      />
     </div>
   );
 };

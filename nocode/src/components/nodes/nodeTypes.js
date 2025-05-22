@@ -6,7 +6,8 @@ import AgentNode from './AgentNode';
 import ModelNode from './ModelNode';
 import MemoryNode from './MemoryNode';
 import ToolNode from './ToolNode';
-import StrategyNode from './StrategyNode'; // Add this import
+import StrategyNode from './StrategyNode';
+import TelegramNode from './TelegramNode'; // Add this import
 
 // Export node types object for ReactFlow
 export const nodeTypes = {
@@ -17,5 +18,6 @@ export const nodeTypes = {
   modelNode: ModelNode,
   memoryNode: MemoryNode,
   toolNode: ToolNode,
-  strategyNode: StrategyNode // Add this line
+  strategyNode: StrategyNode,
+  telegramNode: TelegramNode,
 };

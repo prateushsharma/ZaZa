@@ -11,6 +11,7 @@ import {
   BsTools,
   BsLightbulb
 } from 'react-icons/bs';
+import { FaTelegram } from 'react-icons/fa'; // Add Telegram icon
 
 const Sidebar = () => {
   const onDragStart = (event, nodeType) => {
@@ -80,7 +81,14 @@ const Sidebar = () => {
           <BsBell className="node-icon" />
           <div className="node-label">Notification</div>
         </div>
-       
+        <div 
+          className="node node-telegram" 
+          onDragStart={(event) => onDragStart(event, 'telegramNode')}
+          draggable
+        >
+          <FaTelegram className="node-icon" />
+          <div className="node-label">Telegram</div>
+        </div>
         <div 
           className="node node-strategy" 
           onDragStart={(event) => onDragStart(event, 'strategyNode')}

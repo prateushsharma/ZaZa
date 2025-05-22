@@ -54,41 +54,42 @@ const AgentNode = ({ data, id }) => {
         </div>
       </div>
       
-      {/* Connection points at the bottom with correct handle IDs */}
-      <div className="connection-points">
-        {/* Left connection point - Model */}
-        <Handle
-          type="source"
-          position="bottom"
-          id="model-out"  // Using consistent 'model-out' ID
-          style={{ 
-            left: '25%',
-            background: 'var(--accent-primary)' 
-          }}
-        />
-        
-        {/* Middle connection point - Memory */}
-        <Handle
-          type="source"
-          position="bottom"
-          id="memory-out"  // Using consistent 'memory-out' ID
-          style={{ 
-            left: '50%',
-            background: 'var(--accent-primary)' 
-          }}
-        />
-        
-        {/* Right connection point - Tool */}
-        <Handle
-          type="source"
-          position="bottom"
-          id="tool-out"  // Using consistent 'tool-out' ID
-          style={{ 
-            left: '75%',
-            background: 'var(--accent-primary)' 
-          }}
-        />
-      </div>
+      {/* Connection points positioned properly at the bottom edge */}
+      <Handle
+        type="source"
+        position="bottom"
+        id="model-out"
+        style={{ 
+          left: '25%',
+          transform: 'translateX(-50%)',
+          background: 'var(--accent-primary)',
+          bottom: '-8px'
+        }}
+      />
+      
+      <Handle
+        type="source"
+        position="bottom"
+        id="memory-out"
+        style={{ 
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'var(--accent-primary)',
+          bottom: '-8px'
+        }}
+      />
+      
+      <Handle
+        type="source"
+        position="bottom"
+        id="tool-out"
+        style={{ 
+          left: '75%',
+          transform: 'translateX(-50%)',
+          background: 'var(--accent-primary)',
+          bottom: '-8px'
+        }}
+      />
       
       <Handle
         type="source"
