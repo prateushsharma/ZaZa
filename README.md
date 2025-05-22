@@ -1,4 +1,4 @@
-![DeZer0FAI Logo](data/DeZer0FAI_LOGO.png)
+
 
 <h1 align="center">De\Zer0\FAI</h1>
 
